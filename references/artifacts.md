@@ -62,6 +62,32 @@ If the host strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `
 
 Render artifacts for one stage at a time. Do not include future-stage artifacts in the same reply or artifact update unless the user explicitly activates Lightning Mode. Later-stage sections may exist as empty placeholders, but their content should remain `Pending`.
 
+## Preview and Confirmed Archive
+
+Keep two Markdown artifacts when the host can write files:
+
+- Current preview: `.tlndr/current.md` or `too-long-not-read-current.md`.
+- Confirmed archive: `.tlndr/confirmed.md` or `too-long-not-read-confirmed.md`.
+
+The current preview should contain only:
+
+1. Progress component.
+2. Compact state snapshot.
+3. Current-stage diagram/table/scenario notes.
+4. Current-stage open decisions.
+5. Link or path to the confirmed archive.
+
+When a stage is accepted, move its full content to the confirmed archive and remove it from the current preview before rendering the next stage.
+
+Archive link block:
+
+```html
+<section class="tlndr-panel">
+  <strong>Confirmed Archive</strong>
+  <p>Locked decisions moved to <code>.tlndr/confirmed.md</code>.</p>
+</section>
+```
+
 ## Diagram Brevity and Scenario Notes
 
 Keep diagrams compact. A stage diagram should usually fit on one screen and use the smallest number of nodes needed to support the current decision. Move explanatory detail into a scenario note block below the diagram.

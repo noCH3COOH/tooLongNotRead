@@ -64,9 +64,10 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 7. If the user explicitly overrides the gates, enter Lightning Mode instead of resisting.
 8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
-10. Any diagram or decision table must be written to a dedicated Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
+10. Any diagram or decision table must be written to the current preview Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
 11. A new workflow must first ask whether the user has a target description; proceed to Stage 1 only when the goal is clear.
 12. Proceed one stage at a time; each reply generates only current-stage artifacts, keeps diagrams compact, and places explanations in scenario tables or numbered notes below the diagram.
+13. Accepted stages must move to a confirmed Markdown archive; the current preview Markdown should show only the stage under decision.
 
 ## Repository Layout
 
@@ -118,7 +119,7 @@ Use [SKILL.md](SKILL.md) as the main instruction file and the files under `refer
 3. Ask the user to decide before implementation.
 4. Propose function declarations before writing bodies.
 5. Keep undecided implementation scope as `?`.
-6. Write diagrams and tables into one Markdown artifact file; when no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
+6. Write diagrams and tables into the current preview Markdown; after a stage is accepted, move it to the confirmed Markdown archive. When no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
 
 Local preview example:
 

@@ -37,7 +37,17 @@ Do not start Stage 1 from an empty premise unless the user explicitly asks the a
 
 ## Visual Artifact Delivery
 
-Do not rely only on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active reply contains a user-facing Mermaid diagram or a visual decision table, create or update a dedicated Markdown artifact file for the user, such as `too-long-not-read-artifacts.md` or `.tlndr/artifacts.md`, in the current project or task workspace.
+Do not rely only on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active reply contains a user-facing Mermaid diagram or a visual decision table, create or update a dedicated current-stage preview Markdown artifact for the user, such as `.tlndr/current.md` or `too-long-not-read-current.md`, in the current project or task workspace.
+
+Maintain a separate confirmed archive Markdown artifact, such as `.tlndr/confirmed.md` or `too-long-not-read-confirmed.md`. The preview artifact is for the user's immediate decision only. The confirmed archive is for locked history.
+
+Artifact lifecycle:
+
+1. While a stage is under review, put that stage's diagrams, tables, scenario notes, and open decisions in the current-stage preview artifact.
+2. When the user accepts a stage or delegates the current gate to the agent, move the accepted stage content out of the preview artifact and into the confirmed archive artifact.
+3. After moving content, rewrite the preview artifact so it contains only the progress component, compact state snapshot, a link or path to the confirmed archive, and the next current-stage content.
+4. Do not keep appending confirmed diagrams below the preview content. Confirmed content must not occupy the user's active preview surface.
+5. If the host cannot move or rewrite files, clearly mark archived content as collapsed and keep the current stage at the top.
 
 The artifact is Markdown-first, but it is not limited to Markdown syntax. Use safe native HTML when it improves clarity, especially for progress bars, locked/pending decision snapshots, badges, compact dashboards, and side-by-side decision panels. Prefer the renderer's built-in `.tlndr-*` classes from [assets/markdown-renderer.html](assets/markdown-renderer.html) over inline styles so themes can restyle the same artifact.
 
@@ -46,7 +56,7 @@ After writing the artifact:
 1. If the host has a native Markdown preview, document panel, browser panel, or file-opening capability, open or show the artifact automatically and mention the exact path or panel.
 2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
 3. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
-4. Keep updating the same artifact file during the workflow instead of scattering diagrams across unrelated files.
+4. Keep updating the current-stage preview and confirmed archive files during the workflow instead of scattering diagrams across unrelated files.
 5. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere.
 
 ## Emergency Bypass
