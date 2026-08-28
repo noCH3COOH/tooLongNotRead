@@ -1,4 +1,4 @@
-# CMake Project Guidance
+# C/C++ Project Guidance
 
 Use this reference when the project is or may become a CMake project.
 

@@ -23,6 +23,29 @@ Keep replies visual and decision-oriented. Prefer Mermaid diagrams, Markdown tab
 
 Do not treat a vague project request as approval to implement the whole system. First move through the four gates below unless the user explicitly asks to skip ahead. If the user asks the agent to decide something, make the decision, mark it as agent-decided, and continue.
 
+## Emergency Bypass
+
+If the user explicitly demands skipping gates with instructions such as "just write the code", "stop asking", or "give me a runnable main file", do not resist. Immediately enter **Lightning Mode**:
+
+1. Compress Stages 1-3 into a single compact Markdown table covering system type, dependencies, main entry point, build/runtime command, and obvious risks.
+2. Ask exactly three yes/no questions to close the most dangerous unknowns in that table.
+3. Jump directly to Stage 4 with a minimal viable function list inferred from the table.
+4. Clearly state: "Skipped detailed flow orchestration. Proceeding with minimal viable contract."
+
+Lightning Mode is a user override, not a default shortcut. Preserve any decisions already locked before the override.
+
+## State Snapshot
+
+Immediately after the progress strip, maintain a hidden or compact state snapshot in every active reply. If the host supports memory or task metadata, store the snapshot there and show only a compact version. If it does not, paste the compact block in the reply.
+
+```text
+[LOCKED] Domain: {ProjectName}, Platforms: {Windows/macOS/Linux}
+[LOCKED] Structure: Core -> Utils -> App
+[PENDING] Flow: {branch awaiting user input}
+```
+
+Keep the snapshot factual and short. Update it after each user decision so later stages do not contradict earlier locked choices.
+
 ## Tool-Agnostic Operation
 
 This workflow is not tied to one agent product. Apply it in any chat-based, IDE-based, terminal-based, or repository-aware agent tool that can display Markdown and maintain task context. Adapt the artifacts to the host's abilities:
@@ -42,7 +65,7 @@ The skill documentation is written in English, but the agent's runtime replies m
 - **Core principle**: Draw an extra line before adding another explanatory sentence.
 - **Chinese response limit**: When replying in Chinese, keep core guiding prose, meaning plain narrative sentences, under 200 Chinese characters. Put all remaining content inside Mermaid comments or node labels, Markdown table cells, or numbered list items.
 - **Driving mechanism**: While drafting a reply, if the plain prose exceeds 200 Chinese characters, stop and check whether the remaining content can fit inside diagram node labels, Yes/No branches, or a table "Notes" column. Expand to 300 Chinese characters only when diagrams and tables cannot carry the content.
-- **Exemptions**: Exact reproduction of user error input, file path diffs, and raw build logs are exempt from the length limit.
+- **Exemptions**: Exact reproduction of user error input, file path diffs, raw build logs, and explicit user requests for detailed error explanation or log analysis are exempt from the length limit. If the user asks why something failed, suspend the limit for that single reply and resume it on the next turn.
 - **English response limit**: When replying in English, keep core narrative prose under 150 words. IDs, function names, CMake target names, paths, and code in diagrams or tables do not count.
 - **Optional self-check log**: At the end of a reply, outside the rendered decision area, add a line such as `[Length Stats] prose: 142 words, diagram/table cells: 310 words` to verify compliance.
 
@@ -56,14 +79,44 @@ The skill documentation is written in English, but the agent's runtime replies m
 ## Reference Routing
 
 - For stage outputs, Mermaid patterns, and required decision questions, read [references/artifacts.md](references/artifacts.md).
-- For CMake-specific structure and compile-contract checks, read [references/cmake-projects.md](references/cmake-projects.md) when the project uses or may use CMake.
+- For C/C++ or CMake-specific structure and compile-contract checks, read [references/project-c-c++.md](references/project-c-c++.md).
+- For Python projects, read [references/project-python.md](references/project-python.md).
+- For Rust projects, read [references/project-rust.md](references/project-rust.md).
+- For Go projects, read [references/project-go.md](references/project-go.md).
+- For Node.js or TypeScript projects, read [references/project-node-typescript.md](references/project-node-typescript.md).
+- For Java projects, read [references/project-java.md](references/project-java.md).
 - For function declarations, ownership review, and implementation-scope tables, read [references/function-contracts.md](references/function-contracts.md) during stages 3 and 4.
+
+## Language/Stack Detection
+
+Before routing to CMake-specific guidance, detect the user's implied stack from language, files, package manifests, and commands:
+
+- If C, C++, `CMakeLists.txt`, or CMake is mentioned, read [references/project-c-c++.md](references/project-c-c++.md).
+- If Python, `pyproject.toml`, `setup.py`, or `requirements.txt` is mentioned, read [references/project-python.md](references/project-python.md).
+- If Rust or `Cargo.toml` is mentioned, read [references/project-rust.md](references/project-rust.md).
+- If Go or `go.mod` is mentioned, read [references/project-go.md](references/project-go.md).
+- If Node.js, JavaScript, TypeScript, `package.json`, `tsconfig.json`, `pnpm-lock.yaml`, `yarn.lock`, or `bun.lockb` is mentioned, read [references/project-node-typescript.md](references/project-node-typescript.md).
+- If Java, Maven, Gradle, `pom.xml`, `build.gradle`, or `build.gradle.kts` is mentioned, read [references/project-java.md](references/project-java.md).
+- For all other stacks, use the generic structure in [references/artifacts.md](references/artifacts.md) and omit CMake-specific target diagrams.
+- For all other domains, including documentation, planning, recipes, education, operations, research outlines, travel plans, and other non-software projects, do not load any `project-*.md`. Use only the generic [references/artifacts.md](references/artifacts.md) structure. Replace "CMake target" with "Deliverable" and replace "Compile" with "Produce final output". The four gates still apply: Domain means parts, Structure means table of contents or work breakdown, Flow means timeline or process, and Implementation means who writes, executes, or finalizes each item.
 
 ## Operating Rules
 
 - Ask only the minimum question needed to advance the current gate. When there are many open choices, present a table with a recommended default and a "user decides" column.
 - After each user decision, update the relevant diagram or table rather than restating the whole conversation.
 - Keep a visible "open decisions" list until all blocking decisions for the current gate are closed.
+- **Contract Immutability**: Once a gate is marked `[LOCKED]` in the State Snapshot, it cannot be altered unless the user explicitly says "change decision on [ID]" or an equivalent localized override. If a later user request contradicts a locked decision, reply: "Conflict with locked decision [ID]. Please confirm override or adjust request."
 - Use Markdown-renderable artifacts as the main communication surface. Diagrams should be concise enough that the user can point to a node, edge, branch, or row.
 - When implementing in a repository, inspect the existing tree first and preserve existing conventions. Do not overwrite user work.
 - If the user explicitly asks for agent autonomy, proceed, but still record which decisions were agent-decided.
+
+## Final Handover
+
+When all selected `AI` and `Co-author` functions are implemented and the selected verification checks pass, terminate the active workflow with a **Handover Report**:
+
+1. **Implemented**: files, functions, modules, and generated artifacts completed by the agent.
+2. **Verified**: build, test, lint, or runtime commands that were run and passed.
+3. **Ownership Transfer**: `Manual` functions, stubs, TODOs, missing credentials, or environment-specific steps the user owns.
+4. **Next Command**: the exact next build/test/run command the user should execute locally when appropriate.
+
+After delivering the Handover Report, the skill enters idle mode and stops appending the progress strip unless the user reactivates the workflow.

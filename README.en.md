@@ -15,6 +15,8 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | Structure, dependencies, and module boundaries are unclear | Show boundary diagrams, directory trees, and dependency graphs |
 | Function responsibilities and exception paths appear too late | Draw swimlane flows before reviewing declarations |
 | The user has to read long replies | Use Length Tyranny to move information into diagrams, tables, and numbered items |
+| The user says "stop asking, just write it" | Enter Lightning Mode and compress decisions into three yes/no questions |
+| Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
 
 ## Four Stages
 
@@ -34,6 +36,20 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | Terminal agent | Confirm structure and command boundaries before generating, building, and testing |
 | Repository-aware agent | Treat trees, dependency graphs, and function lists as pre-change review artifacts |
 | Agent without Mermaid rendering | Output Mermaid source and a compact text fallback |
+| Non-software project | Replace target with deliverable and compile with produce final output |
+
+## Stack Adaptation
+
+| Stack | Structure Contract Mapping |
+|---|---|
+| C / C++ / CMake | `CMakeLists.txt`, targets, `target_link_libraries` |
+| Python | `pyproject.toml`, `setup.py`, packages, modules, dependency sections |
+| Rust | `Cargo.toml`, crates, features, workspaces |
+| Go | `go.mod`, packages, `cmd/`, `internal/` |
+| Node.js / TypeScript | `package.json`, `tsconfig.json`, scripts, packages |
+| Java | Maven/Gradle, packages, modules, JUnit |
+| Other | Use generic module diagrams, trees, and flows; omit CMake-specific graphs |
+| Non-software domains | Use generic `artifacts.md`; map the four gates to parts, outline/work breakdown, timeline, and delivery ownership |
 
 ## Core Rules
 
@@ -43,6 +59,9 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 4. Diagrams, tables, and numbered lists carry most of the information.
 5. The agent does not implement the whole project until boundary, structure, flow, declaration, and scope decisions are explicit.
 6. Native planning, memory, approval, and execution features of the host agent remain subordinate to the four gates.
+7. If the user explicitly overrides the gates, enter Lightning Mode instead of resisting.
+8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
+9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
 
 ## Repository Layout
 
@@ -55,8 +74,13 @@ too-long-not-read/
 |   `-- openai.yaml
 `-- references/
     |-- artifacts.md
-    |-- cmake-projects.md
-    `-- function-contracts.md
+    |-- function-contracts.md
+    |-- project-c-c++.md
+    |-- project-go.md
+    |-- project-java.md
+    |-- project-node-typescript.md
+    |-- project-python.md
+    `-- project-rust.md
 ```
 
 ## Install In Codex

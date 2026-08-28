@@ -2,6 +2,10 @@
 
 Use these templates to keep the workflow visual, compact, and easy for the user to correct.
 
+## Template Localization Rule
+
+All human-readable text inside these templates, including table cells, node labels, Mermaid comments, and question prompts, is example content only. The agent must localize it to the user's current runtime language when rendering. Stable identifiers such as `F1` and `D1`, function names such as `loadConfig`, paths, target names, commands, and code remain in their source language.
+
 ## Stage 1: Domain Boundary
 
 Goal: define what the system is, what it depends on, and what is out of scope.

@@ -15,6 +15,8 @@
 | 项目结构、依赖、模块边界看不清 | 用系统边界图、目录树、依赖层级图呈现 |
 | 函数职责和异常流程后期才暴露 | 先画泳道流程，再审函数声明 |
 | 用户被迫读长篇回复 | 用“篇幅暴政”把信息压进图表、表格和编号项 |
+| 用户强行要求“别问了，直接写” | 进入闪电战模式，用 3 个 yes/no 问题压缩决策 |
+| 对话过长导致 Agent 忘记前文 | 每轮维护已锁定决策快照 |
 
 ## 四阶段流程
 
@@ -34,6 +36,20 @@
 | 终端 Agent | 先确认结构与命令边界，再生成、构建、测试 |
 | 仓库型 Agent | 把目录树、依赖图、函数清单作为变更前置审查 |
 | 不支持 Mermaid 的 Agent | 输出 Mermaid 源码，并附紧凑文本备选 |
+| 非软件项目 | 将 target 替换为交付物，将编译替换为产出最终稿 |
+
+## 语言栈适配
+
+| 栈 | 结构契约映射 |
+|---|---|
+| C / C++ / CMake | `CMakeLists.txt`、target、`target_link_libraries` |
+| Python | `pyproject.toml`、`setup.py`、包、模块、依赖区 |
+| Rust | `Cargo.toml`、crate、feature、workspace |
+| Go | `go.mod`、package、`cmd/`、`internal/` |
+| Node.js / TypeScript | `package.json`、`tsconfig.json`、script、package |
+| Java | Maven/Gradle、package、module、JUnit |
+| 其他 | 使用通用模块图、目录树和流程图，省略 CMake 专属图 |
+| 非软件领域 | 使用通用 `artifacts.md`，四阶段映射为部分、目录/分工、时间线、交付责任 |
 
 ## 核心规则
 
@@ -43,6 +59,9 @@
 4. 图表、表格和编号列表承担主要信息量。
 5. 未经过边界、结构、流程、声明和实现范围裁决，Agent 不默认实现整个项目。
 6. Agent 工具自带的计划、记忆、审批、执行权限都必须服从四阶段门禁。
+7. 用户显式打断时进入闪电战模式，不强行阻拦。
+8. 完成后输出终局交付清单，列明已实现、已验证和用户接手项。
+9. 已锁定决策不可被隐式回滚；冲突请求必须先确认覆盖。
 
 ## 仓库结构
 
@@ -55,8 +74,13 @@ too-long-not-read/
 |   `-- openai.yaml
 `-- references/
     |-- artifacts.md
-    |-- cmake-projects.md
-    `-- function-contracts.md
+    |-- function-contracts.md
+    |-- project-c-c++.md
+    |-- project-go.md
+    |-- project-java.md
+    |-- project-node-typescript.md
+    |-- project-python.md
+    `-- project-rust.md
 ```
 
 ## 安装到 Codex
