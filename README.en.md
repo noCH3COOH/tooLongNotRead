@@ -66,6 +66,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
 10. Any diagram or decision table must be written to a dedicated Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
 11. A new workflow must first ask whether the user has a target description; proceed to Stage 1 only when the goal is clear.
+12. Proceed one stage at a time; each reply generates only current-stage artifacts, keeps diagrams compact, and places explanations in scenario tables or numbered notes below the diagram.
 
 ## Repository Layout
 

@@ -23,6 +23,8 @@ Keep replies visual and decision-oriented. Prefer Mermaid diagrams, Markdown tab
 
 Do not treat a vague project request as approval to implement the whole system. First move through the four gates below unless the user explicitly asks to skip ahead. If the user asks the agent to decide something, make the decision, mark it as agent-decided, and continue.
 
+Proceed stage by stage. A normal reply must advance only the current gate and must not generate artifacts for later gates in the same reply. Do not combine domain boundary, structure, flow, declarations, and implementation decisions into one large answer. Move to the next gate only after the current gate is accepted, explicitly delegated to the agent, or bypassed through Lightning Mode.
+
 ## Initial Intake
 
 At the start of every new workflow, ask whether the user already has a written target description and what they want to build, plan, or produce. If the user has already provided a usable target description in the opening request, briefly acknowledge it and proceed into Stage 1. If the target is missing or too vague, ask one compact intake question before drawing the first boundary diagram:
@@ -131,7 +133,7 @@ Before routing to CMake-specific guidance, detect the user's implied stack from 
 - After each user decision, update the relevant diagram or table rather than restating the whole conversation.
 - Keep a visible "open decisions" list until all blocking decisions for the current gate are closed.
 - **Contract Immutability**: Once a gate is marked `[LOCKED]` in the State Snapshot, it cannot be altered unless the user explicitly says "change decision on [ID]" or an equivalent localized override. If a later user request contradicts a locked decision, reply: "Conflict with locked decision [ID]. Please confirm override or adjust request."
-- Use Markdown-renderable artifacts as the main communication surface. Diagrams should be concise enough that the user can point to a node, edge, branch, or row.
+- Use Markdown-renderable artifacts as the main communication surface. Diagrams must be concise enough that the user can point to a node, edge, branch, or row. Prefer fewer nodes with clearer labels over exhaustive diagrams. Put necessary explanation below the diagram as a compact scenario table or numbered list instead of expanding the diagram until it becomes unreadable.
 - When implementing in a repository, inspect the existing tree first and preserve existing conventions. Do not overwrite user work.
 - If the user explicitly asks for agent autonomy, proceed, but still record which decisions were agent-decided.
 

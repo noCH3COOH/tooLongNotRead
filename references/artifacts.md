@@ -58,6 +58,26 @@ Decision status badges:
 
 If the host strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `[PENDING]` text blocks.
 
+## Stage Pacing Rule
+
+Render artifacts for one stage at a time. Do not include future-stage artifacts in the same reply or artifact update unless the user explicitly activates Lightning Mode. Later-stage sections may exist as empty placeholders, but their content should remain `Pending`.
+
+## Diagram Brevity and Scenario Notes
+
+Keep diagrams compact. A stage diagram should usually fit on one screen and use the smallest number of nodes needed to support the current decision. Move explanatory detail into a scenario note block below the diagram.
+
+Scenario note table:
+
+```markdown
+| Scenario | Trigger | Expected Path | User Check |
+|---|---|---|---|
+| Happy path | Valid input | User -> App -> Core -> Adapter -> Result | Confirm |
+| Validation failure | Invalid input | Core returns error before Adapter call | Add missing rule? |
+| Timeout | External dependency slow | Adapter timeout branch | Keep, change, or delete? |
+```
+
+For non-software domains, replace "Expected Path" with "Outcome" or "Deliverable".
+
 ## Initial Intake Prompt
 
 Before Stage 1, ask whether the user already has a written target description. Keep this prompt short and localize it to the user's runtime language:
@@ -85,6 +105,7 @@ Required user-facing artifacts:
 - Minimum feature list.
 - External dependency table.
 - Open decisions table.
+- Scenario notes for ambiguous boundary cases.
 
 Use Mermaid where available:
 
@@ -136,6 +157,7 @@ Required user-facing artifacts:
 - CMake target dependency diagram.
 - Module responsibility table.
 - Structure adjustment questions.
+- Scenario notes for common layout decisions.
 
 Directory tree:
 
@@ -184,6 +206,7 @@ Required user-facing artifacts:
 - Branch and exception list.
 - Function declaration proposal grouped by module.
 - Signature review table.
+- Scenario notes below each flow diagram.
 
 Swimlane sequence diagram:
 
