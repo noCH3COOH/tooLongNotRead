@@ -62,6 +62,24 @@ If the host strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `
 
 Render artifacts for one stage at a time. Do not include future-stage artifacts in the same reply or artifact update unless the user explicitly activates Lightning Mode. Later-stage sections may exist as empty placeholders, but their content should remain `Pending`.
 
+## Visual Unit Packing Rule
+
+Treat a diagram and its nearby table as one visual decision unit. One preview Markdown file may contain either:
+
+1. One diagram, meaning one Mermaid diagram or one native HTML visual diagram, plus one table with no more than six body rows.
+2. No diagram, plus one table with any number of body rows.
+
+Do not put two diagrams in the same preview file. Do not put a diagram plus several decision, scenario, dependency, or open-decision tables in the same preview file. Scenario notes and open decisions are tables for this rule. If a stage needs multiple tables, either merge the rows into one table with compact columns or split the content into more Markdown files.
+
+When splitting files, add a short link explanation near each link:
+
+```markdown
+[Open dependency decisions](stage-1-dependencies.md) - review this before changing the boundary diagram.
+[Open scenario notes](stage-3-flow-scenarios.md) - branch notes connected to `checkoutFlow`.
+```
+
+Progress components, compact state snapshots, and archive/index link panels do not count as the single table, but they must stay short and must not become hidden extra decision tables.
+
 ## Preview and Confirmed Archives
 
 Keep Markdown artifacts organized and explicit when the host can write files. Do not require a single Markdown file.
@@ -78,9 +96,8 @@ The active preview should contain only:
 
 1. Progress component.
 2. Compact state snapshot.
-3. Current-stage diagram/table/scenario notes.
-4. Current-stage open decisions.
-5. Links or paths to confirmed archives.
+3. One current-stage visual decision unit, following the Visual Unit Packing Rule.
+4. Links or paths to sibling preview files and confirmed archives, each with a short explanation.
 
 When a stage is accepted, move its full content to the confirmed archive and remove it from active preview files before rendering the next stage. The chat reply should point to the active preview path or browser URL, not reproduce the diagram.
 

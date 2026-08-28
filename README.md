@@ -17,7 +17,7 @@
 | 用户被迫读长篇回复 | 用“篇幅暴政”把信息压进图表、表格和编号项 |
 | 用户强行要求“别问了，直接写” | 进入闪电战模式，用 3 个 yes/no 问题压缩决策 |
 | 对话过长导致 Agent 忘记前文 | 每轮维护已锁定决策快照 |
-| 用户找不到图表在哪里 | 图表只放 Markdown 预览工件；聊天窗口只给路径、URL 和下一步 |
+| 用户找不到图表在哪里 | 图表只放 Markdown 预览工件；聊天窗口给路径、URL、文件用途和下一步 |
 | Agent 一上来就假设目标 | 开头先问用户是否已有目标描述，或让用户用一段话说明 |
 
 ## 四阶段流程
@@ -69,7 +69,8 @@
 12. 必须一阶段一阶段推进；每轮只生成当前阶段产物，图表保持精炼，说明放在图下场景表或编号项中。
 13. 已确认阶段必须迁移到 confirmed Markdown 归档；活动预览 Markdown 只保留正在裁决的阶段。
 14. Agent 回复窗口只能是简短纯文字导航，不直接渲染图表、HTML 组件或 Markdown 表格。
-15. 图表工件不限制为一个 Markdown 文件；可以按阶段拆分，只要回复窗口明确指导用户打开哪个文件或 URL。
+15. 图表工件不限制为一个 Markdown 文件；可以按阶段拆分，只要回复窗口明确说明每个文件的用途，并指导用户打开哪个文件或 URL。
+16. 单个预览 Markdown 只能包含 `1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`；多文件之间用带说明的超链接连接。
 
 ## 仓库结构
 
@@ -122,7 +123,8 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 4. 函数先声明，后写实现。
 5. 用户未确认的实现范围保持 `?`。
 6. 图表和表格写入 Markdown 预览工件；阶段确认后迁移到 confirmed Markdown 归档；没有 Markdown 渲染器时，用 `scripts/serve_markdown.py` 启动 `assets/markdown-renderer.html` 静态页面，在本地端口预览完整 Markdown。
-7. 可生成多个 Markdown 工件，例如 `.tlndr/stage-1-domain.md`、`.tlndr/current.md`、`.tlndr/confirmed-stage-1-domain.md`；聊天窗口只给当前应查看的路径或 URL。
+7. 可生成多个 Markdown 工件，例如 `.tlndr/stage-1-domain.md`、`.tlndr/current.md`、`.tlndr/confirmed-stage-1-domain.md`；聊天窗口必须简要说明每个文件的用途，并给出当前应查看的路径或 URL。
+8. 单个预览 Markdown 的容量规则是：`1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`。跨文件关系用带说明的 Markdown 超链接连接。
 
 本地预览示例：
 
