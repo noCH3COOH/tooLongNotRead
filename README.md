@@ -4,7 +4,7 @@
 
 **太长不看** 是一套面向 Agent 工具的可视化问答式项目共建流程。它的目标不是让某一个 Agent 写得更多，而是让所有对话式、IDE 式、终端式、仓库式 Agent 在动手实现前，先把项目边界、结构、流程、函数契约和实现范围说清楚。
 
-这个仓库当前以 Codex skill 格式打包，但方法本身不绑定 Codex。任何能保留上下文、输出 Markdown、展示 Mermaid 或至少输出 Mermaid 源码的 Agent 工具，都可以移植这套流程。
+这个仓库当前以 Codex skill 格式打包，但方法本身不绑定 Codex。任何能保留上下文、写入 Markdown 工件，并通过 HTML Markdown 渲染器预览 Mermaid、表格和安全 HTML 的 Agent 工具，都可以移植这套流程。
 
 ## 解决什么问题
 
@@ -17,7 +17,7 @@
 | 用户被迫读长篇回复 | 用“篇幅暴政”把信息压进图表、表格和编号项 |
 | 用户强行要求“别问了，直接写” | 进入闪电战模式，用 3 个 yes/no 问题压缩决策 |
 | 对话过长导致 Agent 忘记前文 | 每轮维护已锁定决策快照 |
-| 用户找不到图表在哪里 | 图表只放 Markdown 预览工件；聊天窗口给路径、URL、文件用途和下一步 |
+| 用户找不到图表在哪里 | 图表只放 Markdown 工件，并统一通过 HTML 渲染器预览；聊天窗口给路径、URL、文件用途和下一步 |
 | Agent 一上来就假设目标 | 开头先问用户是否已有目标描述，或让用户用一段话说明 |
 
 ## 四阶段流程
@@ -37,7 +37,7 @@
 | IDE Agent | 先完成四阶段裁决，再修改文件 |
 | 终端 Agent | 先确认结构与命令边界，再生成、构建、测试 |
 | 仓库型 Agent | 把目录树、依赖图、函数清单作为变更前置审查 |
-| 不支持 Mermaid 的 Agent | 输出 Mermaid 源码，并附紧凑文本备选 |
+| 不支持 Mermaid 的 Agent | 使用等价 HTML Markdown 渲染器；若仍无法渲染，则输出 Mermaid 源码和紧凑文本备选 |
 | 非软件项目 | 将 target 替换为交付物，将编译替换为产出最终稿 |
 
 ## 语言栈适配
@@ -64,13 +64,14 @@
 7. 用户显式打断时进入闪电战模式，不强行阻拦。
 8. 完成后输出终局交付清单，列明已实现、已验证和用户接手项。
 9. 已锁定决策不可被隐式回滚；冲突请求必须先确认覆盖。
-10. 任何图表或决策表必须写入 Markdown 预览工件；CLI Agent 必须提供支持完整 GitHub Flavored Markdown 的本地浏览器预览地址。
+10. 任何图表或决策表必须写入 Markdown 预览工件，并统一通过 HTML Markdown 渲染器展示；CLI Agent 必须提供本地浏览器预览地址。
 11. 新流程开头必须先确认用户是否已有目标描述；已有清晰目标时才直接进入阶段 1。
 12. 必须一阶段一阶段推进；每轮只生成当前阶段产物，图表保持精炼，说明放在图下场景表或编号项中。
 13. 已确认阶段必须迁移到 confirmed Markdown 归档；活动预览 Markdown 只保留正在裁决的阶段。
 14. Agent 回复窗口只能是简短纯文字导航，不直接渲染图表、HTML 组件或 Markdown 表格。
 15. 图表工件不限制为一个 Markdown 文件；可以按阶段拆分，只要回复窗口明确说明每个文件的用途，并指导用户打开哪个文件或 URL。
 16. 单个预览 Markdown 只能包含 `1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`；多文件之间用带说明的超链接连接。
+17. 预览 Markdown 可以使用兼容 Markdown 的原生 HTML 语法；进度条、状态快照、徽章和面板优先使用渲染器内置的 `.tlndr-*` class。
 
 ## 仓库结构
 
@@ -118,11 +119,11 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 将 [SKILL.md](SKILL.md) 作为主指令，将 `references/` 下的文件作为阶段参考资料。不同 Agent 工具的具体接入方式不同，但核心要求一致：
 
 1. 每轮先显示进度。
-2. 先图表，后解释。
+2. 在 HTML 预览中先图表，后解释。
 3. 先让用户裁决，再实现。
 4. 函数先声明，后写实现。
 5. 用户未确认的实现范围保持 `?`。
-6. 图表和表格写入 Markdown 预览工件；阶段确认后迁移到 confirmed Markdown 归档；没有 Markdown 渲染器时，用 `scripts/serve_markdown.py` 启动 `assets/markdown-renderer.html` 静态页面，在本地端口预览完整 Markdown。
+6. 图表和表格写入 Markdown 预览工件，并统一用 HTML Markdown 渲染器查看；阶段确认后迁移到 confirmed Markdown 归档。用 `scripts/serve_markdown.py` 启动 `assets/markdown-renderer.html` 静态页面，在本地端口预览完整 Markdown。
 7. 可生成多个 Markdown 工件，例如 `.tlndr/stage-1-domain.md`、`.tlndr/current.md`、`.tlndr/confirmed-stage-1-domain.md`；聊天窗口必须简要说明每个文件的用途，并给出当前应查看的路径或 URL。
 8. 单个预览 Markdown 的容量规则是：`1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`。跨文件关系用带说明的 Markdown 超链接连接。
 
@@ -132,7 +133,7 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 ```
 
-渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；工件可用 `.tlndr-*` HTML class 呈现进度条、状态快照、徽章和面板。
+渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；工件推荐使用兼容 Markdown 的 HTML 语法和 `.tlndr-*` class 呈现进度条、状态快照、徽章和面板。
 
 ## 使用示例
 

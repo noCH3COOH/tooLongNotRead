@@ -6,11 +6,11 @@ Use these templates to keep the workflow visual, compact, and easy for the user 
 
 All human-readable text inside these templates, including table cells, node labels, Mermaid comments, and question prompts, is example content only. The agent must localize it to the user's current runtime language when rendering. Stable identifiers such as `F1` and `D1`, function names such as `loadConfig`, paths, target names, commands, and code remain in their source language.
 
-## Native HTML Components
+## Markdown-Compatible HTML Components
 
-Markdown artifacts may use safe native HTML when visual structure matters. Use these classes instead of inline styles so the bundled renderer can apply themes.
+Markdown preview artifacts are rendered through the bundled HTML Markdown renderer. Write them as GitHub Flavored Markdown plus safe, Markdown-compatible native HTML when visual structure matters. Use these classes instead of inline styles so the renderer can apply themes.
 
-The bundled renderer supports selectable themes. Keep semantic class names stable and avoid hard-coded colors in artifact HTML.
+The bundled renderer supports selectable themes. Keep semantic class names stable and avoid hard-coded colors in artifact HTML. Native Markdown preview can be used only as a fallback when the HTML renderer cannot run.
 
 Progress component:
 
@@ -56,7 +56,7 @@ Decision status badges:
 <span class="tlndr-badge manual">Manual</span>
 ```
 
-If the host strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `[PENDING]` text blocks.
+If the host or fallback renderer strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `[PENDING]` text blocks, but preserve the HTML-enhanced source whenever the bundled renderer is available.
 
 ## Stage Pacing Rule
 

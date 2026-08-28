@@ -7,7 +7,7 @@ metadata:
 
 # Too Long Not Read
 
-Use this skill when the user wants to start, reshape, or deeply plan a software project through guided questions, diagrams, and explicit decision gates rather than open-ended conversational delegation. It is especially suited to CMake/C++ projects, but can be adapted to other compiled or modular projects and to different agentic coding environments.
+Use this skill when the user wants to start, reshape, or deeply plan a software project through guided questions, diagrams, explicit decision gates, and HTML-rendered Markdown preview artifacts rather than open-ended conversational delegation. It is especially suited to CMake/C++ projects, but can be adapted to other compiled or modular projects and to different agentic coding environments.
 
 The skill's product name is "Too Long Not Read". If UI metadata provides a localized display name, use it only when matching the user's language.
 
@@ -51,7 +51,7 @@ Do not start Stage 1 from an empty premise unless the user explicitly asks the a
 
 ## Visual Artifact Delivery
 
-Do not rely on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active step requires a Mermaid diagram or a visual decision table, create or update Markdown preview artifacts for the user, such as `.tlndr/current.md`, `.tlndr/stage-1-domain.md`, or `too-long-not-read-current.md`, in the current project or task workspace.
+Do not rely on inline chat rendering or host-native Markdown preview when presenting diagrams, tables, or decision artifacts. The canonical preview surface is the bundled HTML Markdown renderer. Whenever an active step requires a Mermaid diagram or a visual decision table, create or update Markdown preview artifacts for the user, such as `.tlndr/current.md`, `.tlndr/stage-1-domain.md`, or `too-long-not-read-current.md`, in the current project or task workspace, then show them through [scripts/serve_markdown.py](scripts/serve_markdown.py) and [assets/markdown-renderer.html](assets/markdown-renderer.html) when the host can run local scripts.
 
 Artifacts are not limited to one Markdown file. Use multiple Markdown files when that improves clarity, such as one current file per stage, one confirmed archive per accepted stage, and an optional `.tlndr/index.md`. The chat reply must always include a brief explanation of the generated or updated Markdown files and guide the user to the exact active preview file or local browser URL.
 
@@ -72,15 +72,17 @@ Artifact lifecycle:
 4. Do not keep appending confirmed diagrams below the preview content. Confirmed content must not occupy the user's active preview surface.
 5. If the host cannot move or rewrite files, clearly mark archived content as collapsed and keep the current stage at the top.
 
-The artifact is Markdown-first, but it is not limited to Markdown syntax. Use safe native HTML when it improves clarity, especially for progress bars, locked/pending decision snapshots, badges, compact dashboards, and side-by-side decision panels. Prefer the renderer's built-in `.tlndr-*` classes from [assets/markdown-renderer.html](assets/markdown-renderer.html) over inline styles so themes can restyle the same artifact.
+The artifact is Markdown-first, but it is not limited to Markdown-only syntax. Write preview files with GitHub Flavored Markdown plus Markdown-compatible, sanitized native HTML when it improves clarity, especially for progress bars, locked/pending decision snapshots, badges, compact dashboards, and side-by-side decision panels. Prefer the renderer's built-in `.tlndr-*` classes from [assets/markdown-renderer.html](assets/markdown-renderer.html) over inline styles so themes can restyle the same artifact.
 
 After writing the artifact:
 
-1. If the host has a native Markdown preview, document panel, browser panel, or file-opening capability, open or show the artifact automatically and mention the exact path or panel.
-2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
-3. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
-4. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
-5. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere.
+1. Start or reuse the local HTML Markdown renderer whenever the host can run local scripts, and provide the browser URL for the active artifact. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html).
+2. If the host has a browser panel or file-opening capability, open the renderer URL automatically rather than opening the raw Markdown file as the primary view.
+3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection.
+4. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
+5. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
+6. If the host cannot run the renderer, state that limitation explicitly and still write the Markdown artifacts when possible; native Markdown preview is only a fallback, not the preferred surface.
+7. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere with the same HTML renderer requirements.
 
 ## Emergency Bypass
 
@@ -107,11 +109,12 @@ Keep the snapshot factual and short. Update it after each user decision so later
 
 ## Tool-Agnostic Operation
 
-This workflow is not tied to one agent product. Apply it in any chat-based, IDE-based, terminal-based, or repository-aware agent tool that can display Markdown and maintain task context. Adapt the artifacts to the host's abilities:
+This workflow is not tied to one agent product. Apply it in any chat-based, IDE-based, terminal-based, or repository-aware agent tool that can write Markdown artifacts, preview them through an HTML Markdown renderer, and maintain task context. Adapt the artifacts to the host's abilities:
 
 - If the host can edit files and run commands, use the gates before changing meaningful project structure or implementation.
 - If the host is chat-only, produce the diagrams, tables, contracts, and implementation plan as user-executable artifacts.
-- If the host cannot render Mermaid, provide the Mermaid source plus a compact text fallback.
+- If the host cannot run the bundled renderer, use an equivalent HTML Markdown renderer with full GitHub-flavored Markdown, sanitized native HTML, Mermaid, and theme support.
+- If the renderer cannot render Mermaid, provide the Mermaid source plus a compact text fallback.
 - If the host has its own task, plan, memory, or approval mechanisms, keep those mechanisms subordinate to the four gates.
 - Avoid product-specific claims unless the current host actually supports that feature.
 

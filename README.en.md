@@ -4,7 +4,7 @@
 
 **Too Long Not Read** is a visual, question-driven project-building workflow for agent tools. Its goal is not to make one agent write more, but to make chat-based, IDE-based, terminal-based, and repository-aware agents clarify project boundaries, structure, flows, function contracts, and implementation scope before writing substantial code.
 
-This repository is currently packaged in a Codex-compatible skill format, but the method is not tied to Codex. Any agent tool that can keep context, output Markdown, and render Mermaid or at least provide Mermaid source can adapt the workflow.
+This repository is currently packaged in a Codex-compatible skill format, but the method is not tied to Codex. Any agent tool that can keep context, write Markdown artifacts, and preview Mermaid, tables, and safe HTML through an HTML Markdown renderer can adapt the workflow.
 
 ## What It Solves
 
@@ -17,7 +17,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | The user has to read long replies | Use Length Tyranny to move information into diagrams, tables, and numbered items |
 | The user says "stop asking, just write it" | Enter Lightning Mode and compress decisions into three yes/no questions |
 | Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
-| The user cannot find the diagram | Keep diagrams in Markdown preview artifacts; chat replies provide paths, URLs, artifact purpose, and next steps |
+| The user cannot find the diagram | Keep diagrams in Markdown artifacts and preview them through the HTML renderer; chat replies provide paths, URLs, artifact purpose, and next steps |
 | The agent assumes the goal too early | Start by asking whether the user has a target description |
 
 ## Four Stages
@@ -37,7 +37,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | IDE agent | Complete the four decision gates before editing files |
 | Terminal agent | Confirm structure and command boundaries before generating, building, and testing |
 | Repository-aware agent | Treat trees, dependency graphs, and function lists as pre-change review artifacts |
-| Agent without Mermaid rendering | Output Mermaid source and a compact text fallback |
+| Agent without Mermaid rendering | Use an equivalent HTML Markdown renderer; if Mermaid still cannot render, provide Mermaid source and a compact text fallback |
 | Non-software project | Replace target with deliverable and compile with produce final output |
 
 ## Stack Adaptation
@@ -64,13 +64,14 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 7. If the user explicitly overrides the gates, enter Lightning Mode instead of resisting.
 8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
-10. Any diagram or decision table must be written to Markdown preview artifacts; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
+10. Any diagram or decision table must be written to Markdown preview artifacts and shown through the HTML Markdown renderer; CLI agents must provide a local browser preview URL.
 11. A new workflow must first ask whether the user has a target description; proceed to Stage 1 only when the goal is clear.
 12. Proceed one stage at a time; each reply generates only current-stage artifacts, keeps diagrams compact, and places explanations in scenario tables or numbered notes below the diagram.
 13. Accepted stages must move to confirmed Markdown archives; active preview Markdown should show only the stage under decision.
 14. The agent reply window must stay brief and plain-text only; do not render diagrams, HTML components, or Markdown tables directly in chat.
 15. Diagram artifacts are not limited to one Markdown file; split by stage when useful, as long as the chat reply briefly explains each file's purpose and points to the file or URL the user should open.
 16. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`; connect multiple files with explained Markdown links.
+17. Preview Markdown may use Markdown-compatible native HTML syntax; progress strips, state snapshots, badges, and panels should prefer the renderer's built-in `.tlndr-*` classes.
 
 ## Repository Layout
 
@@ -118,11 +119,11 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 Use [SKILL.md](SKILL.md) as the main instruction file and the files under `references/` as stage-specific references. Each host agent has its own integration path, but the core requirements stay the same:
 
 1. Show progress first.
-2. Prefer diagrams before explanation.
+2. In the HTML preview, prefer diagrams before explanation.
 3. Ask the user to decide before implementation.
 4. Propose function declarations before writing bodies.
 5. Keep undecided implementation scope as `?`.
-6. Write diagrams and tables into Markdown preview artifacts; after a stage is accepted, move it to confirmed Markdown archives. When no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
+6. Write diagrams and tables into Markdown preview artifacts and view them through the HTML Markdown renderer; after a stage is accepted, move it to confirmed Markdown archives. Use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
 7. Multiple Markdown artifacts are allowed, such as `.tlndr/stage-1-domain.md`, `.tlndr/current.md`, and `.tlndr/confirmed-stage-1-domain.md`; the chat reply must briefly explain each file's purpose and point to the active file or URL.
 8. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`. Use explained Markdown links for relationships across files.
 
@@ -132,7 +133,7 @@ Local preview example:
 python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 ```
 
-The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes; artifacts can use `.tlndr-*` HTML classes for progress bars, state snapshots, badges, and panels.
+The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes; artifacts should use Markdown-compatible HTML syntax and `.tlndr-*` classes for progress bars, state snapshots, badges, and panels.
 
 ## Usage Example
 
