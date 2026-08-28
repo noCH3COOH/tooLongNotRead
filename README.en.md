@@ -17,7 +17,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | The user has to read long replies | Use Length Tyranny to move information into diagrams, tables, and numbered items |
 | The user says "stop asking, just write it" | Enter Lightning Mode and compress decisions into three yes/no questions |
 | Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
-| The user cannot find the diagram | Create a Markdown artifact file; CLI agents serve a full Markdown local HTML preview |
+| The user cannot find the diagram | Keep diagrams in Markdown preview artifacts; chat replies provide only paths, URLs, and next steps |
 | The agent assumes the goal too early | Start by asking whether the user has a target description |
 
 ## Four Stages
@@ -64,10 +64,12 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 7. If the user explicitly overrides the gates, enter Lightning Mode instead of resisting.
 8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
-10. Any diagram or decision table must be written to the current preview Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
+10. Any diagram or decision table must be written to Markdown preview artifacts; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
 11. A new workflow must first ask whether the user has a target description; proceed to Stage 1 only when the goal is clear.
 12. Proceed one stage at a time; each reply generates only current-stage artifacts, keeps diagrams compact, and places explanations in scenario tables or numbered notes below the diagram.
-13. Accepted stages must move to a confirmed Markdown archive; the current preview Markdown should show only the stage under decision.
+13. Accepted stages must move to confirmed Markdown archives; active preview Markdown should show only the stage under decision.
+14. The agent reply window must stay brief and plain-text only; do not render diagrams, HTML components, or Markdown tables directly in chat.
+15. Diagram artifacts are not limited to one Markdown file; split by stage when useful, as long as the chat reply points to the file or URL the user should open.
 
 ## Repository Layout
 
@@ -119,7 +121,8 @@ Use [SKILL.md](SKILL.md) as the main instruction file and the files under `refer
 3. Ask the user to decide before implementation.
 4. Propose function declarations before writing bodies.
 5. Keep undecided implementation scope as `?`.
-6. Write diagrams and tables into the current preview Markdown; after a stage is accepted, move it to the confirmed Markdown archive. When no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
+6. Write diagrams and tables into Markdown preview artifacts; after a stage is accepted, move it to confirmed Markdown archives. When no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
+7. Multiple Markdown artifacts are allowed, such as `.tlndr/stage-1-domain.md`, `.tlndr/current.md`, and `.tlndr/confirmed-stage-1-domain.md`; the chat reply should point only to the active file or URL.
 
 Local preview example:
 

@@ -13,7 +13,7 @@ The skill's product name is "Too Long Not Read". If UI metadata provides a local
 
 ## Core Behavior
 
-Every assistant reply while this skill is active must begin with a compact progress strip:
+Every assistant reply while this skill is active must begin with a compact plain-text progress strip:
 
 ```markdown
 **Too Long Not Read Progress**: [Stage 1 Domain Boundary: Current/Complete/Pending] -> [Stage 2 Structure Contract: Current/Complete/Pending] -> [Stage 3 Flow Orchestration: Current/Complete/Pending] -> [Stage 4 Implementation Decision: Current/Complete/Pending]
@@ -24,6 +24,19 @@ Keep replies visual and decision-oriented. Prefer Mermaid diagrams, Markdown tab
 Do not treat a vague project request as approval to implement the whole system. First move through the four gates below unless the user explicitly asks to skip ahead. If the user asks the agent to decide something, make the decision, mark it as agent-decided, and continue.
 
 Proceed stage by stage. A normal reply must advance only the current gate and must not generate artifacts for later gates in the same reply. Do not combine domain boundary, structure, flow, declarations, and implementation decisions into one large answer. Move to the next gate only after the current gate is accepted, explicitly delegated to the agent, or bypassed through Lightning Mode.
+
+## Chat Reply Boundary
+
+The chat reply window is only for brief plain-text guidance. Do not render Mermaid diagrams, native HTML components, Markdown tables, large checklists, or visual decision boards in the chat reply. Put all diagrams, visual tables, progress UI, state snapshots, badges, and scenario notes in Markdown preview artifacts.
+
+Each chat reply should contain only:
+
+1. Plain-text progress strip.
+2. One short sentence saying what changed or what needs review.
+3. Exact artifact path or local preview URL the user should open.
+4. The minimum reply instruction needed for the current decision.
+
+If the host supports rich chat rendering, still keep the chat reply plain and use the artifact preview as the visual surface.
 
 ## Initial Intake
 
@@ -37,15 +50,17 @@ Do not start Stage 1 from an empty premise unless the user explicitly asks the a
 
 ## Visual Artifact Delivery
 
-Do not rely only on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active reply contains a user-facing Mermaid diagram or a visual decision table, create or update a dedicated current-stage preview Markdown artifact for the user, such as `.tlndr/current.md` or `too-long-not-read-current.md`, in the current project or task workspace.
+Do not rely on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active step requires a Mermaid diagram or a visual decision table, create or update Markdown preview artifacts for the user, such as `.tlndr/current.md`, `.tlndr/stage-1-domain.md`, or `too-long-not-read-current.md`, in the current project or task workspace.
 
-Maintain a separate confirmed archive Markdown artifact, such as `.tlndr/confirmed.md` or `too-long-not-read-confirmed.md`. The preview artifact is for the user's immediate decision only. The confirmed archive is for locked history.
+Artifacts are not limited to one Markdown file. Use multiple Markdown files when that improves clarity, such as one current file per stage, one confirmed archive per accepted stage, and an optional `.tlndr/index.md`. The chat reply must always guide the user to the exact active preview file or local browser URL.
+
+Maintain confirmed archive Markdown artifacts, such as `.tlndr/confirmed.md`, `.tlndr/confirmed-stage-1-domain.md`, or `too-long-not-read-confirmed.md`. Preview artifacts are for the user's immediate decision only. Confirmed archives are for locked history.
 
 Artifact lifecycle:
 
-1. While a stage is under review, put that stage's diagrams, tables, scenario notes, and open decisions in the current-stage preview artifact.
-2. When the user accepts a stage or delegates the current gate to the agent, move the accepted stage content out of the preview artifact and into the confirmed archive artifact.
-3. After moving content, rewrite the preview artifact so it contains only the progress component, compact state snapshot, a link or path to the confirmed archive, and the next current-stage content.
+1. While a stage is under review, put that stage's diagrams, tables, scenario notes, and open decisions in one or more current-stage preview artifacts.
+2. When the user accepts a stage or delegates the current gate to the agent, move the accepted stage content out of active preview artifacts and into confirmed archive artifacts.
+3. After moving content, rewrite the active preview artifact so it contains only the progress component, compact state snapshot, links or paths to confirmed archives, and the next current-stage content.
 4. Do not keep appending confirmed diagrams below the preview content. Confirmed content must not occupy the user's active preview surface.
 5. If the host cannot move or rewrite files, clearly mark archived content as collapsed and keep the current stage at the top.
 
@@ -56,7 +71,7 @@ After writing the artifact:
 1. If the host has a native Markdown preview, document panel, browser panel, or file-opening capability, open or show the artifact automatically and mention the exact path or panel.
 2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
 3. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
-4. Keep updating the current-stage preview and confirmed archive files during the workflow instead of scattering diagrams across unrelated files.
+4. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
 5. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere.
 
 ## Emergency Bypass
@@ -72,7 +87,7 @@ Lightning Mode is a user override, not a default shortcut. Preserve any decision
 
 ## State Snapshot
 
-Immediately after the progress strip, maintain a hidden or compact state snapshot in every active reply. If the host supports memory or task metadata, store the snapshot there and show only a compact version. If it does not, paste the compact block in the reply. In the Markdown artifact, prefer the HTML state snapshot component from [references/artifacts.md](references/artifacts.md) so `[LOCKED]` and `[PENDING]` decisions are visually scannable.
+Immediately after the progress strip, maintain a hidden or compact state snapshot in task metadata or Markdown artifacts. In the chat reply, mention only the active decision unless the host has no writable artifact surface. In the Markdown artifact, prefer the HTML state snapshot component from [references/artifacts.md](references/artifacts.md) so `[LOCKED]` and `[PENDING]` decisions are visually scannable.
 
 ```text
 [LOCKED] Domain: {ProjectName}, Platforms: {Windows/macOS/Linux}

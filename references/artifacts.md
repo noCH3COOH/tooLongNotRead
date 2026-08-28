@@ -62,22 +62,27 @@ If the host strips HTML, fall back to plain Markdown progress and `[LOCKED]` / `
 
 Render artifacts for one stage at a time. Do not include future-stage artifacts in the same reply or artifact update unless the user explicitly activates Lightning Mode. Later-stage sections may exist as empty placeholders, but their content should remain `Pending`.
 
-## Preview and Confirmed Archive
+## Preview and Confirmed Archives
 
-Keep two Markdown artifacts when the host can write files:
+Keep Markdown artifacts organized and explicit when the host can write files. Do not require a single Markdown file.
 
-- Current preview: `.tlndr/current.md` or `too-long-not-read-current.md`.
+Common patterns:
+
+- Single active preview: `.tlndr/current.md` or `too-long-not-read-current.md`.
+- Stage-specific previews: `.tlndr/stage-1-domain.md`, `.tlndr/stage-2-structure.md`, and so on.
 - Confirmed archive: `.tlndr/confirmed.md` or `too-long-not-read-confirmed.md`.
+- Stage-specific confirmed archives: `.tlndr/confirmed-stage-1-domain.md`, `.tlndr/confirmed-stage-2-structure.md`, and so on.
+- Optional index: `.tlndr/index.md` listing the active preview and confirmed archives.
 
-The current preview should contain only:
+The active preview should contain only:
 
 1. Progress component.
 2. Compact state snapshot.
 3. Current-stage diagram/table/scenario notes.
 4. Current-stage open decisions.
-5. Link or path to the confirmed archive.
+5. Links or paths to confirmed archives.
 
-When a stage is accepted, move its full content to the confirmed archive and remove it from the current preview before rendering the next stage.
+When a stage is accepted, move its full content to the confirmed archive and remove it from active preview files before rendering the next stage. The chat reply should point to the active preview path or browser URL, not reproduce the diagram.
 
 Archive link block:
 
