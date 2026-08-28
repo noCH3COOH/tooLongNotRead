@@ -18,6 +18,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | The user says "stop asking, just write it" | Enter Lightning Mode and compress decisions into three yes/no questions |
 | Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
 | The user cannot find the diagram | Create a Markdown artifact file; CLI agents serve a full Markdown local HTML preview |
+| The agent assumes the goal too early | Start by asking whether the user has a target description |
 
 ## Four Stages
 
@@ -64,6 +65,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
 10. Any diagram or decision table must be written to a dedicated Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
+11. A new workflow must first ask whether the user has a target description; proceed to Stage 1 only when the goal is clear.
 
 ## Repository Layout
 
@@ -123,7 +125,7 @@ Local preview example:
 python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 ```
 
-The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized HTML, and Mermaid diagram rendering from source fences.
+The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes; artifacts can use `.tlndr-*` HTML classes for progress bars, state snapshots, badges, and panels.
 
 ## Usage Example
 

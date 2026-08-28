@@ -23,14 +23,26 @@ Keep replies visual and decision-oriented. Prefer Mermaid diagrams, Markdown tab
 
 Do not treat a vague project request as approval to implement the whole system. First move through the four gates below unless the user explicitly asks to skip ahead. If the user asks the agent to decide something, make the decision, mark it as agent-decided, and continue.
 
+## Initial Intake
+
+At the start of every new workflow, ask whether the user already has a written target description and what they want to build, plan, or produce. If the user has already provided a usable target description in the opening request, briefly acknowledge it and proceed into Stage 1. If the target is missing or too vague, ask one compact intake question before drawing the first boundary diagram:
+
+```markdown
+Do you already have a target description? If yes, paste it. If not, describe what you want to build, plan, or produce in one paragraph.
+```
+
+Do not start Stage 1 from an empty premise unless the user explicitly asks the agent to invent the target.
+
 ## Visual Artifact Delivery
 
 Do not rely only on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active reply contains a user-facing Mermaid diagram or a visual decision table, create or update a dedicated Markdown artifact file for the user, such as `too-long-not-read-artifacts.md` or `.tlndr/artifacts.md`, in the current project or task workspace.
 
+The artifact is Markdown-first, but it is not limited to Markdown syntax. Use safe native HTML when it improves clarity, especially for progress bars, locked/pending decision snapshots, badges, compact dashboards, and side-by-side decision panels. Prefer the renderer's built-in `.tlndr-*` classes from [assets/markdown-renderer.html](assets/markdown-renderer.html) over inline styles so themes can restyle the same artifact.
+
 After writing the artifact:
 
 1. If the host has a native Markdown preview, document panel, browser panel, or file-opening capability, open or show the artifact automatically and mention the exact path or panel.
-2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, inline HTML sanitized for safety, and Mermaid code fences. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
+2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
 3. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
 4. Keep updating the same artifact file during the workflow instead of scattering diagrams across unrelated files.
 5. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere.
@@ -48,7 +60,7 @@ Lightning Mode is a user override, not a default shortcut. Preserve any decision
 
 ## State Snapshot
 
-Immediately after the progress strip, maintain a hidden or compact state snapshot in every active reply. If the host supports memory or task metadata, store the snapshot there and show only a compact version. If it does not, paste the compact block in the reply.
+Immediately after the progress strip, maintain a hidden or compact state snapshot in every active reply. If the host supports memory or task metadata, store the snapshot there and show only a compact version. If it does not, paste the compact block in the reply. In the Markdown artifact, prefer the HTML state snapshot component from [references/artifacts.md](references/artifacts.md) so `[LOCKED]` and `[PENDING]` decisions are visually scannable.
 
 ```text
 [LOCKED] Domain: {ProjectName}, Platforms: {Windows/macOS/Linux}

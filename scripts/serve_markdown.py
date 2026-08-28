@@ -66,9 +66,9 @@ def serve(markdown_path: Path, port: int) -> None:
 
     actual_port = find_port(port)
     server = ThreadingHTTPServer(("127.0.0.1", actual_port), Handler)
-    print(f"Serving Markdown artifact: {artifact}")
-    print(f"Renderer: {renderer}")
-    print(f"Open: http://127.0.0.1:{actual_port}/?src=/artifact.md")
+    print(f"Serving Markdown artifact: {artifact}", flush=True)
+    print(f"Renderer: {renderer}", flush=True)
+    print(f"Open: http://127.0.0.1:{actual_port}/?src=/artifact.md", flush=True)
     server.serve_forever()
 
 

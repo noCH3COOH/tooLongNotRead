@@ -15,6 +15,64 @@
       --text: #24292f;
       --muted: #57606a;
       --accent: #0969da;
+      --accent-soft: #ddf4ff;
+      --success: #1a7f37;
+      --success-soft: #dafbe1;
+      --warning: #9a6700;
+      --warning-soft: #fff8c5;
+      --danger: #cf222e;
+      --danger-soft: #ffebe9;
+      --code-bg: #f6f8fa;
+      --shadow: 0 12px 28px rgba(31, 35, 40, 0.08);
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-soft: #102a43;
+      --success: #3fb950;
+      --success-soft: #12341f;
+      --warning: #d29922;
+      --warning-soft: #3a2d0b;
+      --danger: #f85149;
+      --danger-soft: #3d1515;
+      --code-bg: #0d1117;
+      --shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+    }
+
+    body[data-theme="paper"] {
+      --bg: #f8f5ef;
+      --panel: #fffdf8;
+      --border: #ded4c7;
+      --text: #2f2a24;
+      --muted: #70675c;
+      --accent: #7c3aed;
+      --accent-soft: #eee7ff;
+      --code-bg: #f3eee7;
+    }
+
+    body[data-theme="terminal"] {
+      color-scheme: dark;
+      --bg: #050807;
+      --panel: #0b120f;
+      --border: #1d3b2a;
+      --text: #d8ffe7;
+      --muted: #83b796;
+      --accent: #41f07f;
+      --accent-soft: #0e2a18;
+      --success: #41f07f;
+      --success-soft: #0e2a18;
+      --warning: #f7d774;
+      --warning-soft: #2c250d;
+      --danger: #ff6b6b;
+      --danger-soft: #321314;
+      --code-bg: #060b08;
+      --shadow: 0 0 28px rgba(65, 240, 127, 0.1);
     }
 
     * {
@@ -68,6 +126,7 @@
     }
 
     button,
+    select,
     label.file-button {
       display: inline-flex;
       align-items: center;
@@ -109,6 +168,28 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--panel);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .markdown-body h1,
+    .markdown-body h2 {
+      border-bottom-color: var(--border);
+    }
+
+    .markdown-body a {
+      color: var(--accent);
+    }
+
+    .markdown-body blockquote {
+      color: var(--muted);
+      border-left-color: var(--border);
+    }
+
+    .markdown-body pre,
+    .markdown-body code {
+      background-color: var(--code-bg);
+      color: var(--text);
     }
 
     .markdown-body pre {
@@ -130,6 +211,143 @@
 
     details.mermaid-source {
       margin: 8px 0 20px;
+    }
+
+    .tlndr-progress,
+    .tlndr-snapshot,
+    .tlndr-panel {
+      margin: 16px 0;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .tlndr-progress-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tlndr-progress-head strong {
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .tlndr-steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tlndr-steps li {
+      position: relative;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .tlndr-steps li span,
+    .tlndr-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .tlndr-steps li span {
+      min-width: 22px;
+      margin-bottom: 8px;
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .tlndr-steps li strong,
+    .tlndr-steps li em {
+      display: block;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .tlndr-steps li strong {
+      font-size: 13px;
+    }
+
+    .tlndr-steps li em {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+    }
+
+    .tlndr-steps li.done {
+      border-color: var(--success);
+      background: var(--success-soft);
+    }
+
+    .tlndr-steps li.done span,
+    .tlndr-badge.locked,
+    .tlndr-badge.ai {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .tlndr-steps li.current {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .tlndr-steps li.current span {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .tlndr-snapshot {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tlndr-snapshot-row {
+      display: grid;
+      grid-template-columns: auto minmax(90px, 150px) 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .tlndr-badge.pending {
+      background: var(--warning);
+      color: #ffffff;
+    }
+
+    .tlndr-badge.risk,
+    .tlndr-badge.manual {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .tlndr-panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
     }
 
     #editor {
@@ -160,6 +378,11 @@
       .markdown-body {
         padding: 18px;
       }
+
+      .tlndr-steps,
+      .tlndr-snapshot-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -171,6 +394,12 @@
     </div>
     <div class="controls">
       <button id="refresh" type="button">Refresh</button>
+      <select id="theme-select" aria-label="Theme">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="paper">Paper</option>
+        <option value="terminal">Terminal</option>
+      </select>
       <button id="toggle-editor" type="button">Edit Markdown</button>
       <label class="file-button" for="file-input">Open File</label>
       <input id="file-input" type="file" accept=".md,.markdown,text/markdown,text/plain">
@@ -195,10 +424,23 @@
     const sourceLabel = document.getElementById("source-label");
     const params = new URLSearchParams(window.location.search);
     const sourceUrl = params.get("src");
+    const themeSelect = document.getElementById("theme-select");
     let currentMarkdown = "";
     let renderSerial = 0;
 
-    mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
+    function currentMermaidTheme(theme) {
+      return theme === "dark" || theme === "terminal" ? "dark" : "default";
+    }
+
+    function applyTheme(theme) {
+      const selected = theme || "light";
+      document.body.dataset.theme = selected;
+      themeSelect.value = selected;
+      localStorage.setItem("tlndr-renderer-theme", selected);
+      mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: currentMermaidTheme(selected) });
+    }
+
+    applyTheme(params.get("theme") || localStorage.getItem("tlndr-renderer-theme") || "light");
 
     marked.use({
       gfm: true,
@@ -301,6 +543,11 @@
       } catch (error) {
         setStatus(error.message || String(error));
       }
+    });
+
+    themeSelect.addEventListener("change", async () => {
+      applyTheme(themeSelect.value);
+      await renderMarkdown(currentMarkdown);
     });
 
     document.getElementById("toggle-editor").addEventListener("click", () => {
