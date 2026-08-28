@@ -44,7 +44,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     renderer_status, renderer_html = fetch_text(args.renderer_url)
     if renderer_status != 200:
         return fail(f"renderer returned HTTP {renderer_status}")
-    if "Too Long Not Read Markdown Renderer" not in renderer_html:
+    if "AGENT Diagram Display" not in renderer_html and "AGENT图表展示" not in renderer_html:
         return fail("renderer HTML does not look like the bundled renderer")
 
     markdown_url = urljoin(args.renderer_url, src_values[0])

@@ -10,7 +10,9 @@ All human-readable text inside these templates, including table cells, node labe
 
 Markdown preview artifacts are rendered through the bundled HTML Markdown renderer. Write them as GitHub Flavored Markdown plus safe, Markdown-compatible native HTML when visual structure matters. Use these classes instead of inline styles so the renderer can apply themes.
 
-The bundled renderer supports selectable themes. Keep semantic class names stable and avoid hard-coded colors in artifact HTML. Native Markdown preview can be used only as a fallback when the HTML renderer cannot run.
+The bundled renderer supports selectable themes and built-in multi-page tabs. The renderer must de-duplicate tabs by Markdown content so the same rendered content appears only once. Keep semantic class names stable and avoid hard-coded colors in artifact HTML. Native Markdown preview can be used only as a fallback when the HTML renderer cannot run.
+
+The renderer's main title is fixed and localized. Use `AGENT图表展示` for Chinese UI and `AGENT Diagram Display` for English UI. Do not replace the main title with a project or artifact name; show those in tabs, source labels, or link panels.
 
 Progress component:
 
@@ -104,7 +106,7 @@ After changing any Markdown preview or confirmed archive, the agent must verify 
 1. Renderer URL returns HTTP 200.
 2. Markdown `src` endpoint returns HTTP 200.
 3. Markdown source contains the expected current heading, decision ID, function name, or changed text.
-4. If browser inspection is available, the rendered page title or source label matches the active project and artifact.
+4. If browser inspection is available, the renderer title is localized and fixed, and the active tab or source label matches the active project and artifact.
 5. If screenshot or DOM inspection is available, the page is not blank and does not show loading, HTTP, Mermaid, or script errors.
 
 Use `scripts/check_renderer.py <renderer-url> --expect <text>` when available. If the check fails, fix the artifact route, server, renderer, or Markdown file and rerun the check before giving the URL to the user.

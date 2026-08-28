@@ -32,7 +32,7 @@ def find_port(preferred: int) -> int:
             return int(probe.getsockname()[1])
 
 
-def serve(markdown_path: Path, port: int) -> None:
+def serve(markdown_path: Path, port: int, language: str) -> None:
     artifact = markdown_path.resolve()
     workspace = Path.cwd().resolve()
     renderer = RENDERER_PATH.resolve()
@@ -127,7 +127,7 @@ def serve(markdown_path: Path, port: int) -> None:
     print(
         "Open: "
         f"http://127.0.0.1:{actual_port}/?src={encoded_artifact_route}"
-        f"&title={quote(artifact_title)}",
+        f"&title={quote(artifact_title)}&lang={quote(language)}",
         flush=True,
     )
     server.serve_forever()
@@ -139,12 +139,18 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     parser.add_argument("markdown_file", help="Path to the Markdown artifact.")
     parser.add_argument("--port", type=int, default=8765, help="Preferred localhost port.")
+    parser.add_argument(
+        "--lang",
+        choices=("auto", "zh", "en"),
+        default="auto",
+        help="Renderer UI language. Use zh or en to match the user's language.",
+    )
     args = parser.parse_args(argv)
 
     path = Path(args.markdown_file)
     if not path.is_file():
         parser.error(f"Markdown file does not exist: {path}")
-    serve(path, args.port)
+    serve(path, args.port, args.lang)
     return 0
 
 

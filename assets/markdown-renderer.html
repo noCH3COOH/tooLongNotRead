@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Too Long Not Read Markdown Renderer</title>
+  <title>AGENT Diagram Display</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown-light.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css">
   <style>
@@ -160,6 +160,26 @@
       margin-bottom: 14px;
       color: var(--muted);
       font-size: 13px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab-button {
+      max-width: 240px;
+      white-space: nowrap;
+    }
+
+    .tab-button.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .markdown-body {
@@ -389,7 +409,7 @@
 <body>
   <header>
     <div class="title">
-      <strong>Too Long Not Read Markdown Renderer</strong>
+      <strong id="app-title">AGENT Diagram Display</strong>
       <span id="source-label">No source loaded</span>
     </div>
     <div class="controls">
@@ -407,6 +427,7 @@
     </div>
   </header>
   <main>
+    <nav id="tabs" class="tabs" aria-label="Markdown pages"></nav>
     <div id="status" class="status">Loading...</div>
     <textarea id="editor" spellcheck="false"></textarea>
     <article id="preview" class="markdown-body"></article>
@@ -422,12 +443,48 @@
     const status = document.getElementById("status");
     const editor = document.getElementById("editor");
     const sourceLabel = document.getElementById("source-label");
+    const appTitle = document.getElementById("app-title");
+    const tabsEl = document.getElementById("tabs");
     const params = new URLSearchParams(window.location.search);
     const sourceUrl = params.get("src");
     const sourceTitle = params.get("title");
     const themeSelect = document.getElementById("theme-select");
+    const requestedLanguage = (params.get("lang") || "auto").toLowerCase();
+    const detectedLanguage = requestedLanguage === "auto" ? (navigator.language || "en") : requestedLanguage;
+    const uiLanguage = detectedLanguage.toLowerCase().startsWith("zh") ? "zh" : "en";
+    const labels = {
+      zh: {
+        appTitle: "AGENT图表展示",
+        noSource: "未加载来源",
+        manual: "手动输入",
+        defaultMarkdown: "# Markdown Renderer\n\n在编辑器粘贴 Markdown，或打开本地 `.md` 文件。",
+        sourceFallback: "Markdown 工件",
+        rendered: "已渲染",
+        characters: "字符",
+        refreshing: "刷新中...",
+        sourceSuffix: "来源",
+      },
+      en: {
+        appTitle: "AGENT Diagram Display",
+        noSource: "No source loaded",
+        manual: "Manual input",
+        defaultMarkdown: "# Markdown Renderer\n\nPaste Markdown in the editor or open a local `.md` file.",
+        sourceFallback: "Markdown artifact",
+        rendered: "Rendered",
+        characters: "characters",
+        refreshing: "Refreshing...",
+        sourceSuffix: "source",
+      },
+    }[uiLanguage];
     let currentMarkdown = "";
+    let tabs = [];
+    let activeTabId = null;
     let renderSerial = 0;
+
+    document.documentElement.lang = uiLanguage === "zh" ? "zh-CN" : "en";
+    document.title = labels.appTitle;
+    appTitle.textContent = labels.appTitle;
+    sourceLabel.textContent = labels.noSource;
 
     function currentMermaidTheme(theme) {
       return theme === "dark" || theme === "terminal" ? "dark" : "default";
@@ -500,6 +557,117 @@
       status.textContent = message;
     }
 
+    function normalizeSource(src) {
+      if (!src) {
+        return "";
+      }
+      const resolved = new URL(src, window.location.origin);
+      return `${resolved.pathname}${resolved.search}`;
+    }
+
+    async function hashContent(content) {
+      if (window.crypto && crypto.subtle) {
+        const bytes = new TextEncoder().encode(content);
+        const digest = await crypto.subtle.digest("SHA-256", bytes);
+        return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+      }
+
+      let hash = 0;
+      for (let index = 0; index < content.length; index += 1) {
+        hash = ((hash << 5) - hash + content.charCodeAt(index)) | 0;
+      }
+      return `fallback-${Math.abs(hash)}`;
+    }
+
+    function renderTabs() {
+      tabsEl.innerHTML = "";
+      tabs.forEach((tab) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = tab.id === activeTabId ? "tab-button active" : "tab-button";
+        button.textContent = tab.title;
+        button.title = `${tab.title}\n${tab.sourceLabel}`;
+        button.addEventListener("click", async () => {
+          await activateTab(tab.id);
+        });
+        tabsEl.appendChild(button);
+      });
+    }
+
+    function tabTitleFromSource(src, title) {
+      if (title) {
+        return title;
+      }
+      if (!src) {
+        return labels.manual;
+      }
+      const pathname = new URL(src, window.location.origin).pathname;
+      return decodeURIComponent(pathname.split("/").pop() || labels.sourceFallback);
+    }
+
+    function getActiveTab() {
+      return tabs.find((candidate) => candidate.id === activeTabId) || null;
+    }
+
+    async function activateTab(tabId) {
+      const tab = tabs.find((candidate) => candidate.id === tabId);
+      if (!tab) {
+        return;
+      }
+
+      activeTabId = tab.id;
+      currentMarkdown = tab.markdown;
+      editor.value = currentMarkdown;
+      sourceLabel.textContent = `${tab.sourceLabel}`;
+      renderTabs();
+      await renderMarkdown(currentMarkdown);
+    }
+
+    async function upsertTab({ src, title, markdown, sourceLabelText }) {
+      const normalizedSrc = normalizeSource(src);
+      const contentHash = await hashContent(markdown);
+      const sameSource = normalizedSrc ? tabs.find((tab) => tab.src === normalizedSrc) : null;
+      if (sameSource) {
+        const duplicate = tabs.find((tab) => tab !== sameSource && tab.contentHash === contentHash);
+        if (duplicate) {
+          tabs = tabs.filter((tab) => tab !== sameSource);
+          duplicate.src = duplicate.src || normalizedSrc;
+          duplicate.sourceLabel = duplicate.sourceLabel || sourceLabelText || normalizedSrc;
+          await activateTab(duplicate.id);
+          return duplicate;
+        }
+
+        sameSource.id = contentHash;
+        sameSource.contentHash = contentHash;
+        sameSource.markdown = markdown;
+        sameSource.title = tabTitleFromSource(src, title);
+        sameSource.sourceLabel = sourceLabelText || (title ? `${title} - ${normalizedSrc}` : normalizedSrc);
+        await activateTab(sameSource.id);
+        return sameSource;
+      }
+
+      const existing = tabs.find((tab) => tab.contentHash === contentHash);
+      if (existing) {
+        existing.src = existing.src || normalizedSrc;
+        existing.title = existing.title || tabTitleFromSource(src, title);
+        existing.sourceLabel = existing.sourceLabel || sourceLabelText || existing.src || labels.manual;
+        await activateTab(existing.id);
+        return existing;
+      }
+
+      const tab = {
+        id: contentHash,
+        contentHash,
+        markdown,
+        src: normalizedSrc,
+        title: tabTitleFromSource(src, title),
+        sourceLabel: sourceLabelText || (title && normalizedSrc ? `${title} - ${normalizedSrc}` : normalizedSrc) || labels.manual,
+      };
+      tabs.push(tab);
+      await activateTab(tab.id);
+      return tab;
+    }
+
     function transformMermaidBlocks(root) {
       const blocks = root.querySelectorAll("pre > code.language-mermaid, pre > code.lang-mermaid");
       blocks.forEach((codeBlock) => {
@@ -528,12 +696,25 @@
       });
     }
 
+    async function loadMarkdownSource(src, title) {
+      const normalizedSrc = normalizeSource(src);
+      const separator = normalizedSrc.includes("?") ? "&" : "?";
+      const response = await fetch(`${normalizedSrc}${separator}_=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load ${normalizedSrc}: HTTP ${response.status}`);
+      }
+      const markdown = await response.text();
+      const label = title ? `${title} - ${normalizedSrc}` : normalizedSrc;
+      return upsertTab({ src: normalizedSrc, title, markdown, sourceLabelText: label });
+    }
+
     function rewriteMarkdownLinks(root) {
-      if (!sourceUrl) {
+      const activeTab = getActiveTab();
+      if (!activeTab || !activeTab.src) {
         return;
       }
 
-      const sourceBase = new URL(sourceUrl, window.location.origin);
+      const sourceBase = new URL(activeTab.src, window.location.origin);
       root.querySelectorAll("a[href]").forEach((link) => {
         const rawHref = link.getAttribute("href");
         if (!rawHref || rawHref.startsWith("#")) {
@@ -553,9 +734,18 @@
 
         const nextParams = new URLSearchParams();
         nextParams.set("src", `${target.pathname}${target.search}`);
-        nextParams.set("title", link.textContent.trim() || target.pathname.split("/").pop() || "Markdown artifact");
+        nextParams.set("title", link.textContent.trim() || target.pathname.split("/").pop() || labels.sourceFallback);
         link.href = `/?${nextParams.toString()}`;
         link.target = "_self";
+        link.addEventListener("click", async (event) => {
+          event.preventDefault();
+          try {
+            setStatus(labels.refreshing);
+            await loadMarkdownSource(`${target.pathname}${target.search}`, link.textContent.trim() || target.pathname.split("/").pop() || labels.sourceFallback);
+          } catch (error) {
+            setStatus(error.message || String(error));
+          }
+        });
       });
     }
 
@@ -580,37 +770,33 @@
         return;
       }
       if (serial === renderSerial) {
-        setStatus(`Rendered ${markdown.length.toLocaleString()} characters`);
+        setStatus(`${labels.rendered} ${markdown.length.toLocaleString()} ${labels.characters}`);
       }
     }
 
-    async function loadFromSource() {
-      if (!sourceUrl) {
-        currentMarkdown = "# Markdown Renderer\n\nPaste Markdown in the editor or open a local `.md` file.";
-        sourceLabel.textContent = "Manual input";
-        editor.value = currentMarkdown;
-        await renderMarkdown(currentMarkdown);
+    async function loadFromSource(src = sourceUrl, title = sourceTitle) {
+      if (!src) {
+        await upsertTab({
+          src: "",
+          title: labels.manual,
+          markdown: labels.defaultMarkdown,
+          sourceLabelText: labels.manual,
+        });
         return;
       }
 
-      sourceLabel.textContent = sourceTitle ? `${sourceTitle} - ${sourceUrl}` : sourceUrl;
-      if (sourceTitle) {
-        document.title = `${sourceTitle} - Too Long Not Read`;
-      }
-      const separator = sourceUrl.includes("?") ? "&" : "?";
-      const response = await fetch(`${sourceUrl}${separator}_=${Date.now()}`, { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error(`Failed to load ${sourceUrl}: HTTP ${response.status}`);
-      }
-      currentMarkdown = await response.text();
-      editor.value = currentMarkdown;
-      await renderMarkdown(currentMarkdown);
+      await loadMarkdownSource(src, title);
     }
 
     document.getElementById("refresh").addEventListener("click", async () => {
       try {
-        setStatus("Refreshing...");
-        await loadFromSource();
+        setStatus(labels.refreshing);
+        const activeTab = getActiveTab();
+        if (activeTab && activeTab.src) {
+          await loadMarkdownSource(activeTab.src, activeTab.title);
+        } else {
+          await loadFromSource();
+        }
       } catch (error) {
         setStatus(error.message || String(error));
       }
@@ -627,8 +813,12 @@
 
     document.getElementById("render-editor").addEventListener("click", async () => {
       currentMarkdown = editor.value;
-      sourceLabel.textContent = sourceUrl || "Manual input";
-      await renderMarkdown(currentMarkdown);
+      await upsertTab({
+        src: "",
+        title: labels.manual,
+        markdown: currentMarkdown,
+        sourceLabelText: labels.manual,
+      });
     });
 
     document.getElementById("file-input").addEventListener("change", async (event) => {
@@ -636,10 +826,13 @@
       if (!file) {
         return;
       }
-      sourceLabel.textContent = file.name;
       currentMarkdown = await file.text();
-      editor.value = currentMarkdown;
-      await renderMarkdown(currentMarkdown);
+      await upsertTab({
+        src: "",
+        title: file.name,
+        markdown: currentMarkdown,
+        sourceLabelText: `${file.name} - ${labels.sourceSuffix}`,
+      });
     });
 
     try {
