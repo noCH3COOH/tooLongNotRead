@@ -1,0 +1,5 @@
+interface:
+  display_name: "太长不看"
+  short_description: "用问答和图表共建项目结构与实现范围"
+  brand_color: "#2563EB"
+  default_prompt: "Use $too-long-not-read to turn this project idea into a guided Q&A build plan with diagrams and implementation choices."
