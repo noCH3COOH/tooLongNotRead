@@ -62,6 +62,23 @@ If the host or fallback renderer strips HTML, fall back to plain Markdown progre
 
 Render artifacts for one stage at a time. Do not include future-stage artifacts in the same reply or artifact update unless the user explicitly activates Lightning Mode. Later-stage sections may exist as empty placeholders, but their content should remain `Pending`.
 
+## Structured Question Rule
+
+Each active artifact update must create one matching user question. Prefer the host's structured question or user-input API whenever available. The question must reference IDs, node names, row IDs, or function names shown in the preview artifact.
+
+Use one to three questions per turn. Each question should have two or three clear choices when possible, with a recommended default first. If the host cannot show structured questions, place the choices in the preview artifact and ask a concise plain-text question in chat.
+
+Question mapping pattern:
+
+```markdown
+Question ID: Q1
+Artifact IDs: D1, D2, F1
+Prompt: Which decisions should change before locking this stage?
+Choices: Accept recommended, Edit listed IDs, Delegate to agent
+```
+
+Do not advance the gate until the user answers, delegates the decision, or triggers Lightning Mode.
+
 ## Visual Unit Packing Rule
 
 Treat a diagram and its nearby table as one visual decision unit. One preview Markdown file may contain either:
@@ -128,7 +145,7 @@ For non-software domains, replace "Expected Path" with "Outcome" or "Deliverable
 
 ## Initial Intake Prompt
 
-Before Stage 1, ask whether the user already has a written target description. Keep this prompt short and localize it to the user's runtime language:
+Before Stage 1, ask whether the user already has a written target description. Use the host's structured question API when available. Keep this prompt short and localize it to the user's runtime language:
 
 ```markdown
 Do you already have a target description? If yes, paste it. If not, describe what you want to build, plan, or produce in one paragraph.
@@ -192,6 +209,8 @@ Dependency table:
 Stage 1 gate question:
 
 ```markdown
+Question ID: Q1
+Artifact IDs: D1, D2, feature rows
 Please decide only these items: which external dependencies should be removed, kept, or deferred, and which minimum features must enter version one?
 ```
 
@@ -241,6 +260,8 @@ flowchart BT
 Stage 2 gate question:
 
 ```markdown
+Question ID: Q2
+Artifact IDs: directory names, target names, module rows
 Reply by node or directory name: move, split, merge, delete, or say "structure accepted".
 ```
 
@@ -282,6 +303,8 @@ sequenceDiagram
 Stage 3 gate question:
 
 ```markdown
+Question ID: Q3
+Artifact IDs: branch labels, participant names, function rows
 Point to any missing branch, exception, state change, or module interaction in the flow diagram. You can also say "flow accepted, move to function declarations".
 ```
 
@@ -315,6 +338,8 @@ Use plain visible markers for uncertain decisions:
 Stage 4 gate question:
 
 ```markdown
+Question ID: Q4
+Artifact IDs: function names, implementation rows
 Reply by function name: AI, Co-author, or Manual. Functions you do not mention remain `?` and will not be implemented without a decision.
 ```
 

@@ -19,6 +19,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
 | The user cannot find the diagram | Keep diagrams in Markdown artifacts and preview them through the HTML renderer; chat replies provide paths, URLs, artifact purpose, and next steps |
 | The agent assumes the goal too early | Start by asking whether the user has a target description |
+| The agent passively waits for corrections | Ask an active stage question every turn and prefer structured question APIs |
 
 ## Four Stages
 
@@ -72,6 +73,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 15. Diagram artifacts are not limited to one Markdown file; split by stage when useful, as long as the chat reply briefly explains each file's purpose and points to the file or URL the user should open.
 16. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`; connect multiple files with explained Markdown links.
 17. Preview Markdown may use Markdown-compatible native HTML syntax; progress strips, state snapshots, badges, and panels should prefer the renderer's built-in `.tlndr-*` classes.
+18. Question-and-answer interaction is mandatory; every active reply must ask the current-stage question and prefer the host's structured question or user-input API.
 
 ## Repository Layout
 
@@ -126,6 +128,7 @@ Use [SKILL.md](SKILL.md) as the main instruction file and the files under `refer
 6. Write diagrams and tables into Markdown preview artifacts and view them through the HTML Markdown renderer; after a stage is accepted, move it to confirmed Markdown archives. Use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
 7. Multiple Markdown artifacts are allowed, such as `.tlndr/stage-1-domain.md`, `.tlndr/current.md`, and `.tlndr/confirmed-stage-1-domain.md`; the chat reply must briefly explain each file's purpose and point to the active file or URL.
 8. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`. Use explained Markdown links for relationships across files.
+9. Every turn must actively ask a question to advance the decision; when the host supports question, form, choice, or user-input APIs, use them first and map options to IDs, nodes, rows, or function names in the preview artifact.
 
 Local preview example:
 

@@ -25,6 +25,16 @@ Do not treat a vague project request as approval to implement the whole system. 
 
 Proceed stage by stage. A normal reply must advance only the current gate and must not generate artifacts for later gates in the same reply. Do not combine domain boundary, structure, flow, declarations, and implementation decisions into one large answer. Move to the next gate only after the current gate is accepted, explicitly delegated to the agent, or bypassed through Lightning Mode.
 
+## Question-Driven Interaction
+
+Question-and-answer interaction is mandatory, not stylistic. The agent must actively ask the user targeted questions to close decisions, instead of waiting for the user to notice missing choices or reading a long explanation.
+
+Every active workflow reply before Final Handover must include an explicit user question unless the reply is only reporting a tool failure or asking for permission required by the host. The question must map to visible IDs, nodes, rows, functions, files, or options in the current Markdown preview artifacts.
+
+Use the host's structured question or user-input API whenever it is available and suitable, especially for intake, gate acceptance, dependency keep/delete/defer choices, module move/split/merge decisions, branch confirmation, and implementation ownership. Examples include form, choice, approval, or `request_user_input`-style APIs. Prefer one to three focused questions per turn. If no structured question API is available, ask the same questions as concise plain text in the chat reply and preserve the options in the preview artifact.
+
+Do not proceed from one gate to the next because the diagram "looks reasonable". A gate advances only after the user answers the active question, explicitly delegates the decision to the agent, or triggers Lightning Mode.
+
 ## Chat Reply Boundary
 
 The chat reply window is only for brief plain-text guidance. Do not render Mermaid diagrams, native HTML components, Markdown tables, large checklists, or visual decision boards in the chat reply. Put all diagrams, visual tables, progress UI, state snapshots, badges, and scenario notes in Markdown preview artifacts.
@@ -35,7 +45,7 @@ Each chat reply should contain only:
 2. One short sentence saying what changed or what needs review.
 3. Brief plain-text explanation of each generated or updated Markdown artifact, one short line per artifact.
 4. Exact artifact path or local preview URL the user should open.
-5. The minimum reply instruction needed for the current decision.
+5. The active question or structured-question prompt needed for the current decision.
 
 If the host supports rich chat rendering, still keep the chat reply plain and use the artifact preview as the visual surface.
 
@@ -166,6 +176,7 @@ Before routing to CMake-specific guidance, detect the user's implied stack from 
 ## Operating Rules
 
 - Ask only the minimum question needed to advance the current gate. When there are many open choices, present a table with a recommended default and a "user decides" column.
+- Prefer the host's structured question API over free-form chat questions whenever the host exposes one. Keep question choices aligned with preview artifact IDs.
 - After each user decision, update the relevant diagram or table rather than restating the whole conversation.
 - Keep a visible "open decisions" list until all blocking decisions for the current gate are closed.
 - **Contract Immutability**: Once a gate is marked `[LOCKED]` in the State Snapshot, it cannot be altered unless the user explicitly says "change decision on [ID]" or an equivalent localized override. If a later user request contradicts a locked decision, reply: "Conflict with locked decision [ID]. Please confirm override or adjust request."
