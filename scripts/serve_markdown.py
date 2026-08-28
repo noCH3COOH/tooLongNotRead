@@ -40,9 +40,18 @@ def serve(markdown_path: Path, port: int) -> None:
         raise FileNotFoundError(f"Missing static renderer: {renderer}")
 
     artifact_id = hashlib.sha256(str(artifact).encode("utf-8")).hexdigest()[:12]
+    artifact_short_route = f"/artifact/{artifact_id}"
+    artifact_prefix = f"/artifacts/{artifact_id}/"
     artifact_route = f"/artifacts/{artifact_id}/{artifact.name}"
     encoded_artifact_route = f"/artifacts/{artifact_id}/{quote(artifact.name)}"
     artifact_title = f"{workspace.name} / {artifact.name}"
+
+    def is_safe_markdown(candidate: Path) -> bool:
+        try:
+            candidate.relative_to(artifact.parent)
+        except ValueError:
+            return False
+        return candidate.is_file() and candidate.suffix.lower() in {".md", ".markdown"}
 
     class Handler(BaseHTTPRequestHandler):
         def send_bytes(self, payload: bytes, content_type: str) -> None:
@@ -59,15 +68,24 @@ def serve(markdown_path: Path, port: int) -> None:
                 self.send_bytes(renderer.read_bytes(), "text/html; charset=utf-8")
                 return
 
-            if path == artifact_route:
+            if path in {artifact_short_route, artifact_route}:
                 self.send_bytes(artifact.read_bytes(), "text/markdown; charset=utf-8")
                 return
+
+            if path.startswith(artifact_prefix):
+                relative_name = path[len(artifact_prefix) :]
+                candidate = (artifact.parent / relative_name).resolve()
+                if is_safe_markdown(candidate):
+                    self.send_bytes(candidate.read_bytes(), "text/markdown; charset=utf-8")
+                    return
 
             if path == "/artifact-info.json":
                 info = {
                     "artifact": str(artifact),
                     "artifact_id": artifact_id,
+                    "artifact_short_route": artifact_short_route,
                     "artifact_route": artifact_route,
+                    "artifact_prefix": artifact_prefix,
                     "project": str(workspace),
                     "title": artifact_title,
                 }
@@ -103,6 +121,7 @@ def serve(markdown_path: Path, port: int) -> None:
     server = ThreadingHTTPServer(("127.0.0.1", actual_port), Handler)
     print(f"Serving Markdown artifact: {artifact}", flush=True)
     print(f"Project root: {workspace}", flush=True)
+    print(f"Artifact short route: {artifact_short_route}", flush=True)
     print(f"Artifact route: {artifact_route}", flush=True)
     print(f"Renderer: {renderer}", flush=True)
     print(

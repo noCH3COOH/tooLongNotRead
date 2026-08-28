@@ -528,6 +528,37 @@
       });
     }
 
+    function rewriteMarkdownLinks(root) {
+      if (!sourceUrl) {
+        return;
+      }
+
+      const sourceBase = new URL(sourceUrl, window.location.origin);
+      root.querySelectorAll("a[href]").forEach((link) => {
+        const rawHref = link.getAttribute("href");
+        if (!rawHref || rawHref.startsWith("#")) {
+          return;
+        }
+
+        let target;
+        try {
+          target = new URL(rawHref, sourceBase);
+        } catch {
+          return;
+        }
+
+        if (target.origin !== window.location.origin || !target.pathname.toLowerCase().match(/\.m(arkdown|d)$/)) {
+          return;
+        }
+
+        const nextParams = new URLSearchParams();
+        nextParams.set("src", `${target.pathname}${target.search}`);
+        nextParams.set("title", link.textContent.trim() || target.pathname.split("/").pop() || "Markdown artifact");
+        link.href = `/?${nextParams.toString()}`;
+        link.target = "_self";
+      });
+    }
+
     async function renderMarkdown(markdown) {
       renderSerial += 1;
       const serial = renderSerial;
@@ -537,6 +568,7 @@
       });
       preview.innerHTML = clean;
       transformMermaidBlocks(preview);
+      rewriteMarkdownLinks(preview);
       highlightCodeBlocks(preview);
       try {
         await mermaid.run({ nodes: preview.querySelectorAll(".mermaid") });

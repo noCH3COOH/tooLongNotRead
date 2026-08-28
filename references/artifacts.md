@@ -97,6 +97,18 @@ When splitting files, add a short link explanation near each link:
 
 Progress components, compact state snapshots, and archive/index link panels do not count as the single table, but they must stay short and must not become hidden extra decision tables.
 
+## Render Self-Check Rule
+
+After changing any Markdown preview or confirmed archive, the agent must verify the HTML preview before instructing the user to open it. The minimum check is:
+
+1. Renderer URL returns HTTP 200.
+2. Markdown `src` endpoint returns HTTP 200.
+3. Markdown source contains the expected current heading, decision ID, function name, or changed text.
+4. If browser inspection is available, the rendered page title or source label matches the active project and artifact.
+5. If screenshot or DOM inspection is available, the page is not blank and does not show loading, HTTP, Mermaid, or script errors.
+
+Use `scripts/check_renderer.py <renderer-url> --expect <text>` when available. If the check fails, fix the artifact route, server, renderer, or Markdown file and rerun the check before giving the URL to the user.
+
 ## Preview and Confirmed Archives
 
 Keep Markdown artifacts organized and explicit when the host can write files. Do not require a single Markdown file.

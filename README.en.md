@@ -74,6 +74,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 16. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`; connect multiple files with explained Markdown links.
 17. Preview Markdown may use Markdown-compatible native HTML syntax; progress strips, state snapshots, badges, and panels should prefer the renderer's built-in `.tlndr-*` classes.
 18. Question-and-answer interaction is mandatory; every active reply must ask the current-stage question and prefer the host's structured question or user-input API.
+19. After every Markdown artifact change, the agent must run a render self-check before handing the preview URL to the user; at minimum, check renderer HTTP 200, Markdown source HTTP 200, and expected text presence.
 
 ## Repository Layout
 
@@ -87,6 +88,7 @@ too-long-not-read/
 |-- assets/
 |   `-- markdown-renderer.html
 |-- scripts/
+|   |-- check_renderer.py
 |   `-- serve_markdown.py
 `-- references/
     |-- artifacts.md
@@ -129,6 +131,7 @@ Use [SKILL.md](SKILL.md) as the main instruction file and the files under `refer
 7. Multiple Markdown artifacts are allowed, such as `.tlndr/stage-1-domain.md`, `.tlndr/current.md`, and `.tlndr/confirmed-stage-1-domain.md`; the chat reply must briefly explain each file's purpose and point to the active file or URL.
 8. A single preview Markdown file may contain either `one diagram + one table with no more than six body rows`, or `no diagram + one table with any number of rows`. Use explained Markdown links for relationships across files.
 9. Every turn must actively ask a question to advance the decision; when the host supports question, form, choice, or user-input APIs, use them first and map options to IDs, nodes, rows, or function names in the preview artifact.
+10. After each preview file update, use `scripts/check_renderer.py` or an equivalent check to confirm both the HTML preview and Markdown source open, and compare the current-stage heading or decision ID.
 
 Local preview example:
 
@@ -139,6 +142,12 @@ python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes; artifacts should use Markdown-compatible HTML syntax and `.tlndr-*` classes for progress bars, state snapshots, badges, and panels.
 
 `serve_markdown.py` generates a path-hashed URL for each Markdown file, such as `/artifacts/<hash>/<file>.md`, so projects do not collide through a generic `/artifact.md` preview route.
+
+Render self-check example:
+
+```bash
+python scripts/check_renderer.py "http://127.0.0.1:8765/?src=/artifacts/<hash>/<file>.md" --expect "Stage 1"
+```
 
 ## Usage Example
 

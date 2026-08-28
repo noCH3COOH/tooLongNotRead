@@ -90,10 +90,13 @@ After writing the artifact:
 2. If the host has a browser panel or file-opening capability, open the renderer URL automatically rather than opening the raw Markdown file as the primary view.
 3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection.
 4. Renderer URLs must identify the exact artifact with a project/file-specific route or token. Do not provide a generic `/artifact.md` URL as the primary link, because old browser tabs or servers can point to a different project's artifact.
-5. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
-6. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
-7. If the host cannot run the renderer, state that limitation explicitly and still write the Markdown artifacts when possible; native Markdown preview is only a fallback, not the preferred surface.
-8. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere with the same HTML renderer requirements.
+5. After every Markdown artifact change and before telling the user to open it, run a render self-check. At minimum, verify that the renderer URL returns HTTP 200, the Markdown `src` endpoint returns HTTP 200, and the Markdown source contains the current artifact's expected heading, decision ID, or changed text. Use [scripts/check_renderer.py](scripts/check_renderer.py) when available.
+6. When the host has browser automation, screenshot, DOM inspection, or page text extraction, also verify that the rendered page title/source label matches the active project and artifact, and that the page does not show a loading, HTTP, or script error state.
+7. If the render self-check fails, fix the route, renderer, server, or artifact and rerun the check. Do not hand the user a preview URL that has not passed self-check unless the host cannot run any check; in that case, state the limitation plainly.
+8. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
+9. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
+10. If the host cannot run the renderer, state that limitation explicitly and still write the Markdown artifacts when possible; native Markdown preview is only a fallback, not the preferred surface.
+11. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere with the same HTML renderer requirements.
 
 ## Emergency Bypass
 
@@ -160,6 +163,7 @@ The skill documentation is written in English, but the agent's runtime replies m
 - For Java projects, read [references/project-java.md](references/project-java.md).
 - For function declarations, ownership review, and implementation-scope tables, read [references/function-contracts.md](references/function-contracts.md) during stages 3 and 4.
 - For file-backed diagram delivery and CLI rendering, use [scripts/serve_markdown.py](scripts/serve_markdown.py) and the bundled static page [assets/markdown-renderer.html](assets/markdown-renderer.html) when the host environment allows scripts.
+- For renderer URL and Markdown source checks, use [scripts/check_renderer.py](scripts/check_renderer.py) when the host environment allows scripts.
 
 ## Language/Stack Detection
 

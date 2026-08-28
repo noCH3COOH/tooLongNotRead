@@ -74,6 +74,7 @@
 16. 单个预览 Markdown 只能包含 `1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`；多文件之间用带说明的超链接连接。
 17. 预览 Markdown 可以使用兼容 Markdown 的原生 HTML 语法；进度条、状态快照、徽章和面板优先使用渲染器内置的 `.tlndr-*` class。
 18. 问答式交互是强制规则；每个活跃回复必须主动提出当前阶段问题，并优先调用宿主的结构化 question / user-input API。
+19. 每次更改 Markdown 工件后，Agent 必须先完成渲染自检，再把预览 URL 交给用户；至少检查渲染器 200、Markdown 源 200、关键文本存在。
 
 ## 仓库结构
 
@@ -87,6 +88,7 @@ too-long-not-read/
 |-- assets/
 |   `-- markdown-renderer.html
 |-- scripts/
+|   |-- check_renderer.py
 |   `-- serve_markdown.py
 `-- references/
     |-- artifacts.md
@@ -129,6 +131,7 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 7. 可生成多个 Markdown 工件，例如 `.tlndr/stage-1-domain.md`、`.tlndr/current.md`、`.tlndr/confirmed-stage-1-domain.md`；聊天窗口必须简要说明每个文件的用途，并给出当前应查看的路径或 URL。
 8. 单个预览 Markdown 的容量规则是：`1 张图 + 1 个不超过 6 行的表`，或 `无图 + 1 个任意行数的表`。跨文件关系用带说明的 Markdown 超链接连接。
 9. 每轮必须主动提问推进决策；宿主支持 question / form / choice / user-input API 时必须优先使用，问题选项要对应预览工件中的 ID、节点、行或函数名。
+10. 每次更新预览文件后，用 `scripts/check_renderer.py` 或等价方式确认 HTML 预览和 Markdown 源都能打开，并比对当前阶段的关键标题或决策 ID。
 
 本地预览示例：
 
@@ -139,6 +142,12 @@ python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；工件推荐使用兼容 Markdown 的 HTML 语法和 `.tlndr-*` class 呈现进度条、状态快照、徽章和面板。
 
 `serve_markdown.py` 会为每个 Markdown 文件生成带路径哈希的唯一 URL，例如 `/artifacts/<hash>/<file>.md`，避免多个工程都使用 `/artifact.md` 时打开旧工程预览。
+
+渲染自检示例：
+
+```bash
+python scripts/check_renderer.py "http://127.0.0.1:8765/?src=/artifacts/<hash>/<file>.md" --expect "阶段 1"
+```
 
 ## 使用示例
 
