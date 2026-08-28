@@ -23,6 +23,18 @@ Keep replies visual and decision-oriented. Prefer Mermaid diagrams, Markdown tab
 
 Do not treat a vague project request as approval to implement the whole system. First move through the four gates below unless the user explicitly asks to skip ahead. If the user asks the agent to decide something, make the decision, mark it as agent-decided, and continue.
 
+## Visual Artifact Delivery
+
+Do not rely only on inline chat rendering when presenting diagrams, tables, or decision artifacts. Whenever an active reply contains a user-facing Mermaid diagram or a visual decision table, create or update a dedicated Markdown artifact file for the user, such as `too-long-not-read-artifacts.md` or `.tlndr/artifacts.md`, in the current project or task workspace.
+
+After writing the artifact:
+
+1. If the host has a native Markdown preview, document panel, browser panel, or file-opening capability, open or show the artifact automatically and mention the exact path or panel.
+2. If the host runs in a CLI or terminal without reliable Markdown rendering, start a local HTML Markdown renderer on an available localhost port and provide the browser URL. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, inline HTML sanitized for safety, and Mermaid code fences. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html) when available.
+3. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
+4. Keep updating the same artifact file during the workflow instead of scattering diagrams across unrelated files.
+5. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere.
+
 ## Emergency Bypass
 
 If the user explicitly demands skipping gates with instructions such as "just write the code", "stop asking", or "give me a runnable main file", do not resist. Immediately enter **Lightning Mode**:
@@ -86,6 +98,7 @@ The skill documentation is written in English, but the agent's runtime replies m
 - For Node.js or TypeScript projects, read [references/project-node-typescript.md](references/project-node-typescript.md).
 - For Java projects, read [references/project-java.md](references/project-java.md).
 - For function declarations, ownership review, and implementation-scope tables, read [references/function-contracts.md](references/function-contracts.md) during stages 3 and 4.
+- For file-backed diagram delivery and CLI rendering, use [scripts/serve_markdown.py](scripts/serve_markdown.py) and the bundled static page [assets/markdown-renderer.html](assets/markdown-renderer.html) when the host environment allows scripts.
 
 ## Language/Stack Detection
 

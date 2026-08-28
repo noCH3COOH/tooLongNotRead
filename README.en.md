@@ -17,6 +17,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 | The user has to read long replies | Use Length Tyranny to move information into diagrams, tables, and numbered items |
 | The user says "stop asking, just write it" | Enter Lightning Mode and compress decisions into three yes/no questions |
 | Long conversations make the agent forget earlier choices | Maintain a locked decision snapshot in every active reply |
+| The user cannot find the diagram | Create a Markdown artifact file; CLI agents serve a full Markdown local HTML preview |
 
 ## Four Stages
 
@@ -62,6 +63,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 7. If the user explicitly overrides the gates, enter Lightning Mode instead of resisting.
 8. Finish with a Handover Report listing implemented work, verified checks, and user-owned items.
 9. Locked decisions cannot be implicitly rolled back; conflicting requests require explicit override confirmation.
+10. Any diagram or decision table must be written to a dedicated Markdown artifact; CLI agents must provide a local browser preview URL with full GitHub Flavored Markdown support.
 
 ## Repository Layout
 
@@ -72,6 +74,10 @@ too-long-not-read/
 |-- README.en.md
 |-- agents/
 |   `-- openai.yaml
+|-- assets/
+|   `-- markdown-renderer.html
+|-- scripts/
+|   `-- serve_markdown.py
 `-- references/
     |-- artifacts.md
     |-- function-contracts.md
@@ -109,6 +115,15 @@ Use [SKILL.md](SKILL.md) as the main instruction file and the files under `refer
 3. Ask the user to decide before implementation.
 4. Propose function declarations before writing bodies.
 5. Keep undecided implementation scope as `?`.
+6. Write diagrams and tables into one Markdown artifact file; when no Markdown renderer is available, use `scripts/serve_markdown.py` to launch the `assets/markdown-renderer.html` static page and preview full Markdown on a local port.
+
+Local preview example:
+
+```bash
+python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
+```
+
+The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized HTML, and Mermaid diagram rendering from source fences.
 
 ## Usage Example
 

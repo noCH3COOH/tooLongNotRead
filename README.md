@@ -17,6 +17,7 @@
 | 用户被迫读长篇回复 | 用“篇幅暴政”把信息压进图表、表格和编号项 |
 | 用户强行要求“别问了，直接写” | 进入闪电战模式，用 3 个 yes/no 问题压缩决策 |
 | 对话过长导致 Agent 忘记前文 | 每轮维护已锁定决策快照 |
+| 用户找不到图表在哪里 | 必须生成 Markdown 图表文件；CLI 环境启动完整 Markdown 本地 HTML 预览 |
 
 ## 四阶段流程
 
@@ -62,6 +63,7 @@
 7. 用户显式打断时进入闪电战模式，不强行阻拦。
 8. 完成后输出终局交付清单，列明已实现、已验证和用户接手项。
 9. 已锁定决策不可被隐式回滚；冲突请求必须先确认覆盖。
+10. 任何图表或决策表必须写入专用 Markdown 文件；CLI Agent 必须提供支持完整 GitHub Flavored Markdown 的本地浏览器预览地址。
 
 ## 仓库结构
 
@@ -72,6 +74,10 @@ too-long-not-read/
 |-- README.en.md
 |-- agents/
 |   `-- openai.yaml
+|-- assets/
+|   `-- markdown-renderer.html
+|-- scripts/
+|   `-- serve_markdown.py
 `-- references/
     |-- artifacts.md
     |-- function-contracts.md
@@ -109,6 +115,15 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 3. 先让用户裁决，再实现。
 4. 函数先声明，后写实现。
 5. 用户未确认的实现范围保持 `?`。
+6. 图表和表格写入同一个 Markdown 工件文件；没有 Markdown 渲染器时，用 `scripts/serve_markdown.py` 启动 `assets/markdown-renderer.html` 静态页面，在本地端口预览完整 Markdown。
+
+本地预览示例：
+
+```bash
+python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
+```
+
+渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的 HTML，以及 Mermaid 图表源码渲染。
 
 ## 使用示例
 
