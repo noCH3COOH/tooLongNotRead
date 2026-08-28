@@ -432,6 +432,44 @@
       return theme === "dark" || theme === "terminal" ? "dark" : "default";
     }
 
+    function getHighlighter() {
+      const candidate = window.hljs || globalThis.hljs;
+      if (!candidate || typeof candidate.highlightElement !== "function") {
+        return null;
+      }
+      return candidate;
+    }
+
+    function highlightCodeBlocks(root) {
+      const highlighter = getHighlighter();
+      if (!highlighter) {
+        return;
+      }
+
+      root.querySelectorAll("pre code:not(.language-mermaid):not(.lang-mermaid)").forEach((block) => {
+        try {
+          highlighter.highlightElement(block);
+        } catch (error) {
+          console.warn("Skipping syntax highlight for one code block.", error);
+        }
+      });
+    }
+
+    function highlightForMarked(code, language) {
+      const highlighter = getHighlighter();
+      if (!highlighter || typeof highlighter.highlight !== "function") {
+        return escapeHtml(code);
+      }
+
+      try {
+        const validLanguage = language && highlighter.getLanguage(language) ? language : "plaintext";
+        return highlighter.highlight(code, { language: validLanguage }).value;
+      } catch (error) {
+        console.warn("Falling back to escaped code block.", error);
+        return escapeHtml(code);
+      }
+    }
+
     function applyTheme(theme) {
       const selected = theme || "light";
       document.body.dataset.theme = selected;
@@ -449,8 +487,7 @@
       mangle: false,
       headerIds: true,
       highlight(code, language) {
-        const validLanguage = language && hljs.getLanguage(language) ? language : "plaintext";
-        return hljs.highlight(code, { language: validLanguage }).value;
+        return highlightForMarked(code, language);
       }
     });
 
@@ -499,9 +536,7 @@
       });
       preview.innerHTML = clean;
       transformMermaidBlocks(preview);
-      preview.querySelectorAll("pre code:not(.language-mermaid):not(.lang-mermaid)").forEach((block) => {
-        hljs.highlightElement(block);
-      });
+      highlightCodeBlocks(preview);
       try {
         await mermaid.run({ nodes: preview.querySelectorAll(".mermaid") });
       } catch (error) {
