@@ -9,11 +9,13 @@ Mermaid, and highlight.js.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import json
 from pathlib import Path
 import socket
 from typing import Iterable
-from urllib.parse import urlparse
+from urllib.parse import quote, unquote, urlparse
 
 
 RENDERER_PATH = Path(__file__).resolve().parents[1] / "assets" / "markdown-renderer.html"
@@ -32,9 +34,15 @@ def find_port(preferred: int) -> int:
 
 def serve(markdown_path: Path, port: int) -> None:
     artifact = markdown_path.resolve()
+    workspace = Path.cwd().resolve()
     renderer = RENDERER_PATH.resolve()
     if not renderer.is_file():
         raise FileNotFoundError(f"Missing static renderer: {renderer}")
+
+    artifact_id = hashlib.sha256(str(artifact).encode("utf-8")).hexdigest()[:12]
+    artifact_route = f"/artifacts/{artifact_id}/{artifact.name}"
+    encoded_artifact_route = f"/artifacts/{artifact_id}/{quote(artifact.name)}"
+    artifact_title = f"{workspace.name} / {artifact.name}"
 
     class Handler(BaseHTTPRequestHandler):
         def send_bytes(self, payload: bytes, content_type: str) -> None:
@@ -46,13 +54,40 @@ def serve(markdown_path: Path, port: int) -> None:
             self.wfile.write(payload)
 
         def do_GET(self) -> None:  # noqa: N802
-            path = urlparse(self.path).path
+            path = unquote(urlparse(self.path).path)
             if path in {"/", "/index.html", "/renderer.html"}:
                 self.send_bytes(renderer.read_bytes(), "text/html; charset=utf-8")
                 return
 
-            if path == "/artifact.md":
+            if path == artifact_route:
                 self.send_bytes(artifact.read_bytes(), "text/markdown; charset=utf-8")
+                return
+
+            if path == "/artifact-info.json":
+                info = {
+                    "artifact": str(artifact),
+                    "artifact_id": artifact_id,
+                    "artifact_route": artifact_route,
+                    "project": str(workspace),
+                    "title": artifact_title,
+                }
+                self.send_bytes(
+                    json.dumps(info, ensure_ascii=False, indent=2).encode("utf-8"),
+                    "application/json; charset=utf-8",
+                )
+                return
+
+            if path == "/artifact.md":
+                message = (
+                    "Generic /artifact.md is disabled to avoid opening artifacts from "
+                    "the wrong project. Restart the renderer and use the generated "
+                    f"{artifact_route} URL."
+                )
+                self.send_response(410)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(message.encode("utf-8"))
                 return
 
             if path == "/healthz":
@@ -67,8 +102,15 @@ def serve(markdown_path: Path, port: int) -> None:
     actual_port = find_port(port)
     server = ThreadingHTTPServer(("127.0.0.1", actual_port), Handler)
     print(f"Serving Markdown artifact: {artifact}", flush=True)
+    print(f"Project root: {workspace}", flush=True)
+    print(f"Artifact route: {artifact_route}", flush=True)
     print(f"Renderer: {renderer}", flush=True)
-    print(f"Open: http://127.0.0.1:{actual_port}/?src=/artifact.md", flush=True)
+    print(
+        "Open: "
+        f"http://127.0.0.1:{actual_port}/?src={encoded_artifact_route}"
+        f"&title={quote(artifact_title)}",
+        flush=True,
+    )
     server.serve_forever()
 
 

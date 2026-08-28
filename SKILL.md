@@ -89,10 +89,11 @@ After writing the artifact:
 1. Start or reuse the local HTML Markdown renderer whenever the host can run local scripts, and provide the browser URL for the active artifact. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html).
 2. If the host has a browser panel or file-opening capability, open the renderer URL automatically rather than opening the raw Markdown file as the primary view.
 3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, and theme selection.
-4. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
-5. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
-6. If the host cannot run the renderer, state that limitation explicitly and still write the Markdown artifacts when possible; native Markdown preview is only a fallback, not the preferred surface.
-7. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere with the same HTML renderer requirements.
+4. Renderer URLs must identify the exact artifact with a project/file-specific route or token. Do not provide a generic `/artifact.md` URL as the primary link, because old browser tabs or servers can point to a different project's artifact.
+5. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
+6. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
+7. If the host cannot run the renderer, state that limitation explicitly and still write the Markdown artifacts when possible; native Markdown preview is only a fallback, not the preferred surface.
+8. If the host cannot write files or open ports, state that limitation explicitly and provide a single Markdown payload that the user can render elsewhere with the same HTML renderer requirements.
 
 ## Emergency Bypass
 

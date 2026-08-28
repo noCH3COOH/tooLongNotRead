@@ -138,6 +138,8 @@ python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 
 渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；工件推荐使用兼容 Markdown 的 HTML 语法和 `.tlndr-*` class 呈现进度条、状态快照、徽章和面板。
 
+`serve_markdown.py` 会为每个 Markdown 文件生成带路径哈希的唯一 URL，例如 `/artifacts/<hash>/<file>.md`，避免多个工程都使用 `/artifact.md` 时打开旧工程预览。
+
 ## 使用示例
 
 ```text

@@ -424,6 +424,7 @@
     const sourceLabel = document.getElementById("source-label");
     const params = new URLSearchParams(window.location.search);
     const sourceUrl = params.get("src");
+    const sourceTitle = params.get("title");
     const themeSelect = document.getElementById("theme-select");
     let currentMarkdown = "";
     let renderSerial = 0;
@@ -560,7 +561,10 @@
         return;
       }
 
-      sourceLabel.textContent = sourceUrl;
+      sourceLabel.textContent = sourceTitle ? `${sourceTitle} - ${sourceUrl}` : sourceUrl;
+      if (sourceTitle) {
+        document.title = `${sourceTitle} - Too Long Not Read`;
+      }
       const separator = sourceUrl.includes("?") ? "&" : "?";
       const response = await fetch(`${sourceUrl}${separator}_=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) {

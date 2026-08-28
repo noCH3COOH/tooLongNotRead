@@ -138,6 +138,8 @@ python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765
 
 The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes; artifacts should use Markdown-compatible HTML syntax and `.tlndr-*` classes for progress bars, state snapshots, badges, and panels.
 
+`serve_markdown.py` generates a path-hashed URL for each Markdown file, such as `/artifacts/<hash>/<file>.md`, so projects do not collide through a generic `/artifact.md` preview route.
+
 ## Usage Example
 
 ```text
