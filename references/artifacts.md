@@ -4,13 +4,13 @@ Use these templates to keep the workflow visual, compact, and easy for the user 
 
 ## Template Localization Rule
 
-All human-readable text inside these templates, including table cells, node labels, Mermaid comments, and question prompts, is example content only. The agent must localize it to the user's current runtime language when rendering. Stable identifiers such as `F1` and `D1`, function names such as `loadConfig`, paths, target names, commands, and code remain in their source language.
+All human-readable text inside these templates, including chart titles, chart legends, table headers, table cells, node labels, Mermaid comments, scenario notes, and question prompts, is example content only. The agent must localize it to the user's current runtime language when rendering. Stable identifiers such as `F1` and `D1`, function names such as `loadConfig`, paths, target names, commands, and code remain in their source language.
 
 ## Markdown-Compatible HTML Components
 
 Markdown preview artifacts are rendered through the bundled HTML Markdown renderer. Write them as GitHub Flavored Markdown plus safe, Markdown-compatible native HTML when visual structure matters. Use these classes instead of inline styles so the renderer can apply themes.
 
-The bundled renderer supports selectable themes and built-in multi-page tabs. The renderer must de-duplicate tabs by Markdown content so the same rendered content appears only once. Keep semantic class names stable and avoid hard-coded colors in artifact HTML. Native Markdown preview can be used only as a fallback when the HTML renderer cannot run.
+The bundled renderer supports selectable themes, built-in multi-page tabs, and zoomable viewing for rendered diagrams and images. Mermaid diagrams and Markdown images are zoomable by default. Native HTML visuals should use `.tlndr-diagram`, `.tlndr-chart`, or `.tlndr-visual` so the renderer can attach zoom controls. The renderer must de-duplicate tabs by Markdown content so the same rendered content appears only once. Keep semantic class names stable and avoid hard-coded colors in artifact HTML. Native Markdown preview can be used only as a fallback when the HTML renderer cannot run.
 
 The renderer's main title is fixed and localized. Use `AGENT图表展示` for Chinese UI and `AGENT Diagram Display` for English UI. Do not replace the main title with a project or artifact name; show those in tabs, source labels, or link panels.
 
@@ -107,7 +107,7 @@ After changing any Markdown preview or confirmed archive, the agent must verify 
 2. Markdown `src` endpoint returns HTTP 200.
 3. Markdown source contains the expected current heading, decision ID, function name, or changed text.
 4. If browser inspection is available, the renderer title is localized and fixed, and the active tab or source label matches the active project and artifact.
-5. If screenshot or DOM inspection is available, the page is not blank and does not show loading, HTTP, Mermaid, or script errors.
+5. If screenshot or DOM inspection is available, the page is not blank, rendered diagrams or generated images expose zoom controls or zoom interaction, and the page does not show loading, HTTP, Mermaid, or script errors.
 
 Use `scripts/check_renderer.py <renderer-url> --expect <text>` when available. If the check fails, fix the artifact route, server, renderer, or Markdown file and rerun the check before giving the URL to the user.
 
@@ -143,7 +143,9 @@ Archive link block:
 
 ## Diagram Brevity and Scenario Notes
 
-Keep diagrams compact. A stage diagram should usually fit on one screen and use the smallest number of nodes needed to support the current decision. Move explanatory detail into a scenario note block below the diagram.
+Keep diagrams compact without breaking the logic needed for the current decision. A stage diagram should usually fit on one screen and use the smallest number of nodes needed to show required actors, modules, dependencies, branches, failure paths, and ownership boundaries. Move explanatory detail into a scenario note block below the diagram.
+
+Diagram labels, table headers, table cells, scenario notes, and question prompts must follow the user's runtime language. Keep only stable IDs, code symbols, paths, commands, package names, target names, and function names in their source language.
 
 Scenario note table:
 

@@ -88,10 +88,10 @@ After writing the artifact:
 
 1. Start or reuse the local HTML Markdown renderer whenever the host can run local scripts, and provide the browser URL for the active artifact. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html), passing `--lang zh` or `--lang en` when the user's language is known.
 2. If the host has a browser panel or file-opening capability, open the renderer URL automatically rather than opening the raw Markdown file as the primary view.
-3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, theme selection, and built-in multi-page tabs.
+3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, theme selection, built-in multi-page tabs, and zoomable diagram viewing.
 4. Renderer URLs must identify the exact artifact with a project/file-specific route or token. Do not provide a generic `/artifact.md` URL as the primary link, because old browser tabs or servers can point to a different project's artifact.
 5. After every Markdown artifact change and before telling the user to open it, run a render self-check. At minimum, verify that the renderer URL returns HTTP 200, the Markdown `src` endpoint returns HTTP 200, and the Markdown source contains the current artifact's expected heading, decision ID, or changed text. Use [scripts/check_renderer.py](scripts/check_renderer.py) when available.
-6. When the host has browser automation, screenshot, DOM inspection, or page text extraction, also verify that the renderer title is localized as "AGENT图表展示" or "AGENT Diagram Display", the active tab or source label matches the active project and artifact, and the page does not show a loading, HTTP, or script error state.
+6. When the host has browser automation, screenshot, DOM inspection, or page text extraction, also verify that the renderer title is localized as "AGENT图表展示" or "AGENT Diagram Display", the active tab or source label matches the active project and artifact, diagrams or generated images expose a zoom control or zoom interaction, and the page does not show a loading, HTTP, or script error state.
 7. If the render self-check fails, fix the route, renderer, server, or artifact and rerun the check. Do not hand the user a preview URL that has not passed self-check unless the host cannot run any check; in that case, state the limitation plainly.
 8. If Mermaid rendering is unavailable, the artifact must still include the Mermaid source and a compact text fallback so the user can locate and inspect the diagram.
 9. Keep current-stage preview and confirmed archive files organized under one predictable location when possible, such as `.tlndr/`, and mention the active preview path or URL in every chat reply.
@@ -130,13 +130,14 @@ This workflow is not tied to one agent product. Apply it in any chat-based, IDE-
 - If the host cannot run the bundled renderer, use an equivalent HTML Markdown renderer with full GitHub-flavored Markdown, sanitized native HTML, Mermaid, and theme support.
 - The renderer's app title must remain fixed and localized to the user's language, such as "AGENT图表展示" in Chinese or "AGENT Diagram Display" in English. Project and artifact names belong in tabs or source labels, not the main title.
 - The renderer should keep multiple Markdown pages in tabs and de-duplicate tabs by Markdown content so the same artifact content is shown only once.
+- The renderer should let users enlarge every rendered diagram or image without leaving the preview page.
 - If the renderer cannot render Mermaid, provide the Mermaid source plus a compact text fallback.
 - If the host has its own task, plan, memory, or approval mechanisms, keep those mechanisms subordinate to the four gates.
 - Avoid product-specific claims unless the current host actually supports that feature.
 
 ## Runtime Language
 
-The skill documentation is written in English, but the agent's runtime replies must match the user's language. If the user writes in Chinese, reply in Chinese. If the user writes in English, reply in English. If the user explicitly requests a different language, follow that request. Localize progress labels, table headers, decision choices, and diagram node labels while preserving stable IDs, function names, target names, paths, and code.
+The skill documentation is written in English, but the agent's runtime replies must match the user's language. If the user writes in Chinese, reply in Chinese. If the user writes in English, reply in English. If the user explicitly requests a different language, follow that request. Localize all human-readable chart, diagram, and table text, including progress labels, table headers, table cells, decision choices, chart legends, Mermaid comments, and diagram node labels. Preserve stable IDs, function names, target names, paths, commands, and code.
 
 ## Length Tyranny
 
@@ -187,7 +188,7 @@ Before routing to CMake-specific guidance, detect the user's implied stack from 
 - After each user decision, update the relevant diagram or table rather than restating the whole conversation.
 - Keep a visible "open decisions" list until all blocking decisions for the current gate are closed.
 - **Contract Immutability**: Once a gate is marked `[LOCKED]` in the State Snapshot, it cannot be altered unless the user explicitly says "change decision on [ID]" or an equivalent localized override. If a later user request contradicts a locked decision, reply: "Conflict with locked decision [ID]. Please confirm override or adjust request."
-- Use Markdown-renderable artifacts as the main communication surface. Diagrams must be concise enough that the user can point to a node, edge, branch, or row. Prefer fewer nodes with clearer labels over exhaustive diagrams. Put necessary explanation below the diagram as a compact scenario table or numbered list instead of expanding the diagram until it becomes unreadable.
+- Use Markdown-renderable artifacts as the main communication surface. Diagrams must be concise enough that the user can point to a node, edge, branch, or row, but they must preserve the logic needed for the current decision, including required actors, dependencies, branches, failure paths, and ownership boundaries. Prefer fewer nodes with clearer labels over exhaustive diagrams. Put necessary explanation below the diagram as a compact scenario table or numbered list instead of expanding the diagram until it becomes unreadable.
 - When implementing in a repository, inspect the existing tree first and preserve existing conventions. Do not overwrite user work.
 - If the user explicitly asks for agent autonomy, proceed, but still record which decisions were agent-decided.
 

@@ -76,6 +76,8 @@
 18. 问答式交互是强制规则；每个活跃回复必须主动提出当前阶段问题，并优先调用宿主的结构化 question / user-input API。
 19. 每次更改 Markdown 工件后，Agent 必须先完成渲染自检，再把预览 URL 交给用户；至少检查渲染器 200、Markdown 源 200、关键文本存在。
 20. HTML 渲染器内置多页面 Tab；相同 Markdown 内容只保留一个 Tab。主标题按语言固定为 `AGENT图表展示` 或 `AGENT Diagram Display`。
+21. 生成的图、表、图例、节点、场景说明和问题提示必须跟随用户语言；只保留 ID、路径、命令、target、函数名等稳定符号。
+22. 图必须在保留关键参与者、依赖、分支、失败路径和责任边界的前提下尽量精简，并支持放大查看。
 
 ## 仓库结构
 
@@ -140,7 +142,7 @@ cp -R ./* ~/.codex/skills/too-long-not-read/
 python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765 --lang zh
 ```
 
-渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；工件推荐使用兼容 Markdown 的 HTML 语法和 `.tlndr-*` class 呈现进度条、状态快照、徽章和面板。
+渲染器支持 GitHub Flavored Markdown、表格、任务列表、代码块、高亮、链接、图片、引用、经过安全清洗的原生 HTML，以及 Mermaid 图表源码渲染。页面内置 Light、Dark、Paper、Terminal 主题；Mermaid 图、Markdown 图片，以及带 `.tlndr-diagram`、`.tlndr-chart`、`.tlndr-visual` 的原生 HTML 图都可以放大查看。工件推荐使用兼容 Markdown 的 HTML 语法和 `.tlndr-*` class 呈现进度条、状态快照、徽章和面板。
 
 `serve_markdown.py` 会为每个 Markdown 文件生成带路径哈希的唯一 URL，例如 `/artifacts/<hash>/<file>.md`，避免多个工程都使用 `/artifact.md` 时打开旧工程预览。
 

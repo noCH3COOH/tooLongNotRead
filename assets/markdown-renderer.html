@@ -229,6 +229,71 @@
       background: #ffffff;
     }
 
+    .diagram-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .zoomable-image {
+      cursor: zoom-in;
+    }
+
+    .zoom-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .zoom-overlay.open {
+      display: grid;
+    }
+
+    .zoom-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 1480px;
+      width: min(100%, 1480px);
+      margin: 0 auto;
+      color: #ffffff;
+    }
+
+    .zoom-head strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .zoom-stage {
+      display: grid;
+      place-items: center;
+      overflow: auto;
+      max-width: 1480px;
+      width: min(100%, 1480px);
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .zoom-stage > * {
+      max-width: none;
+    }
+
+    .zoom-stage svg,
+    .zoom-stage img {
+      max-width: none;
+      height: auto;
+    }
+
     details.mermaid-source {
       margin: 8px 0 20px;
     }
@@ -432,6 +497,13 @@
     <textarea id="editor" spellcheck="false"></textarea>
     <article id="preview" class="markdown-body"></article>
   </main>
+  <div id="zoom-overlay" class="zoom-overlay" role="dialog" aria-modal="true" aria-labelledby="zoom-title">
+    <div class="zoom-head">
+      <strong id="zoom-title">Diagram preview</strong>
+      <button id="zoom-close" type="button">Close</button>
+    </div>
+    <div id="zoom-stage" class="zoom-stage"></div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
@@ -463,6 +535,10 @@
         characters: "字符",
         refreshing: "刷新中...",
         sourceSuffix: "来源",
+        zoom: "放大查看",
+        close: "关闭",
+        diagramPreview: "图表预览",
+        imagePreview: "图片预览",
       },
       en: {
         appTitle: "AGENT Diagram Display",
@@ -474,6 +550,10 @@
         characters: "characters",
         refreshing: "Refreshing...",
         sourceSuffix: "source",
+        zoom: "Zoom",
+        close: "Close",
+        diagramPreview: "Diagram preview",
+        imagePreview: "Image preview",
       },
     }[uiLanguage];
     let currentMarkdown = "";
@@ -485,6 +565,8 @@
     document.title = labels.appTitle;
     appTitle.textContent = labels.appTitle;
     sourceLabel.textContent = labels.noSource;
+    document.getElementById("zoom-title").textContent = labels.diagramPreview;
+    document.getElementById("zoom-close").textContent = labels.close;
 
     function currentMermaidTheme(theme) {
       return theme === "dark" || theme === "terminal" ? "dark" : "default";
@@ -555,6 +637,41 @@
 
     function setStatus(message) {
       status.textContent = message;
+    }
+
+    function openZoom(content, title) {
+      const overlay = document.getElementById("zoom-overlay");
+      const stage = document.getElementById("zoom-stage");
+      const zoomTitle = document.getElementById("zoom-title");
+      stage.innerHTML = "";
+      stage.appendChild(content.cloneNode(true));
+      zoomTitle.textContent = title;
+      overlay.classList.add("open");
+    }
+
+    function closeZoom() {
+      const overlay = document.getElementById("zoom-overlay");
+      const stage = document.getElementById("zoom-stage");
+      overlay.classList.remove("open");
+      stage.innerHTML = "";
+    }
+
+    function attachZoomButton(target, title) {
+      if (target.dataset.zoomAttached === "true") {
+        return;
+      }
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "diagram-toolbar";
+      const zoomButton = document.createElement("button");
+      zoomButton.type = "button";
+      zoomButton.textContent = labels.zoom;
+      toolbar.appendChild(zoomButton);
+      target.before(toolbar);
+      target.dataset.zoomAttached = "true";
+      zoomButton.addEventListener("click", () => {
+        openZoom(target, title);
+      });
     }
 
     function normalizeSource(src) {
@@ -693,6 +810,23 @@
         container.appendChild(details);
 
         codeBlock.parentElement.replaceWith(container);
+        attachZoomButton(container, labels.diagramPreview);
+      });
+    }
+
+    function enableImageZoom(root) {
+      root.querySelectorAll("img").forEach((image) => {
+        image.classList.add("zoomable-image");
+        image.title = labels.zoom;
+        image.addEventListener("click", () => {
+          openZoom(image, image.alt || labels.imagePreview);
+        });
+      });
+    }
+
+    function enableNativeVisualZoom(root) {
+      root.querySelectorAll(".tlndr-diagram, .tlndr-chart, .tlndr-visual").forEach((visual) => {
+        attachZoomButton(visual, visual.getAttribute("aria-label") || labels.diagramPreview);
       });
     }
 
@@ -759,6 +893,8 @@
       preview.innerHTML = clean;
       transformMermaidBlocks(preview);
       rewriteMarkdownLinks(preview);
+      enableImageZoom(preview);
+      enableNativeVisualZoom(preview);
       highlightCodeBlocks(preview);
       try {
         await mermaid.run({ nodes: preview.querySelectorAll(".mermaid") });
@@ -833,6 +969,18 @@
         markdown: currentMarkdown,
         sourceLabelText: `${file.name} - ${labels.sourceSuffix}`,
       });
+    });
+
+    document.getElementById("zoom-close").addEventListener("click", closeZoom);
+    document.getElementById("zoom-overlay").addEventListener("click", (event) => {
+      if (event.target.id === "zoom-overlay") {
+        closeZoom();
+      }
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeZoom();
+      }
     });
 
     try {
