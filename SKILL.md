@@ -88,7 +88,7 @@ After writing the artifact:
 
 1. Start or reuse the local HTML Markdown renderer whenever the host can run local scripts, and provide the browser URL for the active artifact. Use [scripts/serve_markdown.py](scripts/serve_markdown.py) with [assets/markdown-renderer.html](assets/markdown-renderer.html), passing `--lang zh` or `--lang en` when the user's language is known.
 2. If the host has a browser panel or file-opening capability, open the renderer URL automatically rather than opening the raw Markdown file as the primary view.
-3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, theme selection, built-in multi-page tabs, and zoomable diagram viewing.
+3. The renderer must support full GitHub-flavored Markdown, including headings, tables, task lists, links, images, blockquotes, lists, fenced code, sanitized native HTML, Mermaid code fences, theme selection, built-in multi-page tabs, and true zoomable diagram viewing with SVG pan/zoom controls for Mermaid output.
 4. Renderer URLs must identify the exact artifact with a project/file-specific route or token. Do not provide a generic `/artifact.md` URL as the primary link, because old browser tabs or servers can point to a different project's artifact.
 5. After every Markdown artifact change and before telling the user to open it, run a render self-check. At minimum, verify that the renderer URL returns HTTP 200, the Markdown `src` endpoint returns HTTP 200, and the Markdown source contains the current artifact's expected heading, decision ID, or changed text. Use [scripts/check_renderer.py](scripts/check_renderer.py) when available.
 6. When the host has browser automation, screenshot, DOM inspection, or page text extraction, also verify that the renderer title is localized as "AGENT图表展示" or "AGENT Diagram Display", the active tab or source label matches the active project and artifact, diagrams or generated images expose a zoom control or zoom interaction, and the page does not show a loading, HTTP, or script error state.
@@ -130,7 +130,7 @@ This workflow is not tied to one agent product. Apply it in any chat-based, IDE-
 - If the host cannot run the bundled renderer, use an equivalent HTML Markdown renderer with full GitHub-flavored Markdown, sanitized native HTML, Mermaid, and theme support.
 - The renderer's app title must remain fixed and localized to the user's language, such as "AGENT图表展示" in Chinese or "AGENT Diagram Display" in English. Project and artifact names belong in tabs or source labels, not the main title.
 - The renderer should keep multiple Markdown pages in tabs and de-duplicate tabs by Markdown content so the same artifact content is shown only once.
-- The renderer should let users enlarge every rendered diagram or image without leaving the preview page.
+- The renderer should let users enlarge every rendered diagram or image without leaving the preview page. Mermaid output should support actual SVG zoom, pan, and reset controls rather than only copying the same diagram into a larger overlay.
 - If the renderer cannot render Mermaid, provide the Mermaid source plus a compact text fallback.
 - If the host has its own task, plan, memory, or approval mechanisms, keep those mechanisms subordinate to the four gates.
 - Avoid product-specific claims unless the current host actually supports that feature.

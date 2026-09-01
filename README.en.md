@@ -77,7 +77,7 @@ This repository is currently packaged in a Codex-compatible skill format, but th
 19. After every Markdown artifact change, the agent must run a render self-check before handing the preview URL to the user; at minimum, check renderer HTTP 200, Markdown source HTTP 200, and expected text presence.
 20. The HTML renderer has built-in multi-page tabs; identical Markdown content appears in only one tab. The main title is fixed by UI language as `AGENT图表展示` or `AGENT Diagram Display`.
 21. Generated diagrams, tables, legends, nodes, scenario notes, and question prompts must follow the user's language; only stable IDs, paths, commands, targets, and function names stay in their source language.
-22. Diagrams must stay as compact as possible while preserving required actors, dependencies, branches, failure paths, and ownership boundaries, and must support zoomed viewing.
+22. Diagrams must stay as compact as possible while preserving required actors, dependencies, branches, failure paths, and ownership boundaries, and must support true SVG zoom, pan, and reset.
 
 ## Repository Layout
 
@@ -142,7 +142,7 @@ Local preview example:
 python scripts/serve_markdown.py too-long-not-read-artifacts.md --port 8765 --lang en
 ```
 
-The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes. Mermaid diagrams, Markdown images, and native HTML visuals using `.tlndr-diagram`, `.tlndr-chart`, or `.tlndr-visual` can be opened in a zoomed view. Artifacts should use Markdown-compatible HTML syntax and `.tlndr-*` classes for progress bars, state snapshots, badges, and panels.
+The renderer supports GitHub Flavored Markdown, tables, task lists, fenced code, highlighting, links, images, blockquotes, sanitized native HTML, and Mermaid diagram rendering from source fences. It includes Light, Dark, Paper, and Terminal themes. Mermaid diagrams open with true SVG zoom, pan, and reset controls; Markdown images and native HTML visuals using `.tlndr-diagram`, `.tlndr-chart`, or `.tlndr-visual` can also be opened in a zoomed view. Artifacts should use Markdown-compatible HTML syntax and `.tlndr-*` classes for progress bars, state snapshots, badges, and panels.
 
 `serve_markdown.py` generates a path-hashed URL for each Markdown file, such as `/artifacts/<hash>/<file>.md`, so projects do not collide through a generic `/artifact.md` preview route.
 

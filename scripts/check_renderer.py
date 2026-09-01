@@ -9,6 +9,14 @@ from typing import Iterable
 from urllib.parse import parse_qs, urljoin, urlparse
 from urllib.request import Request, urlopen
 
+REQUIRED_RENDERER_MARKERS = (
+    "marked",
+    "mermaid",
+    "svg-pan-zoom",
+    "zoom-in",
+    "zoom-reset",
+)
+
 
 def fetch_text(url: str) -> tuple[int, str]:
     request = Request(url, headers={"Cache-Control": "no-cache"})
@@ -46,6 +54,14 @@ def main(argv: Iterable[str] | None = None) -> int:
         return fail(f"renderer returned HTTP {renderer_status}")
     if "AGENT Diagram Display" not in renderer_html and "AGENT图表展示" not in renderer_html:
         return fail("renderer HTML does not look like the bundled renderer")
+    missing_renderer_markers = [
+        marker for marker in REQUIRED_RENDERER_MARKERS if marker not in renderer_html
+    ]
+    if missing_renderer_markers:
+        return fail(
+            "renderer HTML is missing required Markdown/Mermaid/zoom markers: "
+            f"{missing_renderer_markers}"
+        )
 
     markdown_url = urljoin(args.renderer_url, src_values[0])
     markdown_status, markdown_text = fetch_text(markdown_url)
